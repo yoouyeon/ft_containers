@@ -202,32 +202,32 @@ namespace ft
 	};
 	//ANCHOR - Non-member functions
 	template<class T, class Alloc>
-	bool operator==(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator==(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	bool operator!=(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator!=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	bool operator<(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator<(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	bool operator<=(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator<=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	bool operator>(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator>(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	bool operator>=(const std::vector<T,Alloc>& lhs, const std::vector<T,Alloc>& rhs) {
+	bool operator>=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 
 	};
 	template<class T, class Alloc>
-	void swap(std::vector<T,Alloc>& lhs, std::vector<T,Alloc>& rhs) {
-		// Specializes the std::swap algorithm for std::vector.
+	void swap(ft::vector<T,Alloc>& lhs, ft::vector<T,Alloc>& rhs) {
+		// Specializes the std::swap algorithm for ft::vector.
 		// Swaps the contents of lhs and rhs. Calls lhs.swap(rhs).
 	};
 }
