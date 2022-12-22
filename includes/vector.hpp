@@ -22,9 +22,9 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 			// typedef pointer										iterator;		// 이게 맞나
-			typedef typename vector_iterator<pointer>			iterator;
+			typedef typename vector_iterator<value_type>			iterator;
 			// typedef const_pointer								const_iterator;	// 이게 맞나
-			typedef typename vector_iterator<const_pointer>		const_iterator;
+			typedef typename vector_iterator<const value_type>		const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 		protected :
@@ -61,6 +61,8 @@ namespace ft
 				_alloc(Allocator(alloc)) {
 				// (3) Constructs the container with count copies of elements with value value.
 				_max_size = _alloc.max_size();
+				if (_size < 0)
+					throw std::length_error("vector (constructor)");
 				/* TODO
 					- capacity 결정
 					- 할당
@@ -73,6 +75,9 @@ namespace ft
 				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
 				_max_size = _alloc.max_size();
+				_size = std::distance(last, first);
+				if (_size < 0)
+					throw std::length_error("vector (constructor)");
 				/* TODO
 					- capacity 결정
 					- 할당
@@ -102,13 +107,16 @@ namespace ft
 			};
 			void assign(size_type count, const T& value) {
 				// Replaces the contents with count copies of value value
-
+				if (count < 0)
+					throw std::length_error("vector (assign)");
 			};
 			template<class InputIt>
 			void assign(InputIt first, InputIt last) {
 				// Replaces the contents with copies of those in the range [first, last).
 				// The behavior is undefined if either argument is an iterator into *this.
-
+				size_type range = std::distance(first, last);
+				if (range < 0)
+					throw std::length_error("vector (assign)");
 			};
 			allocator_type get_allocator() const {
 				// Returns the allocator associated with the container.
