@@ -3,7 +3,9 @@
 
 #include <memory>		// allocator
 #include <exception>	// exception
+#include "vector_iterator.hpp"
 #include "reverse_iterator.hpp"
+#include "algorithm.hpp"
 
 namespace ft
 {
@@ -19,8 +21,10 @@ namespace ft
 			typedef typename allocator_type::const_reference	const_reference;
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
-			typedef pointer										iterator;		// 이게 맞나
-			typedef const_pointer								const_iterator;	// 이게 맞나
+			// typedef pointer										iterator;		// 이게 맞나
+			typedef typename vector_iterator<pointer>			iterator;
+			// typedef const_pointer								const_iterator;	// 이게 맞나
+			typedef typename vector_iterator<const_pointer>		const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 		protected :
@@ -29,37 +33,69 @@ namespace ft
 			iterator		_end;		// null
 			size_type		_size;		// 0
 			size_type		_capacity;	// 0
-			size_type		_max_size;
 			allocator_type	_alloc;		// Allocator()
+			size_type		_max_size;	// _alloc.max_size()
 		public :
 			//ANCHOR - Member functions
-			vector() {
+			vector() \
+				: _begin(NULL), \
+				-end(NULL), \
+				_size(0), \
+				_capacity(0), \
+				_alloc(Allocator()) {
 				// (1) Default constructor. Constructs an empty container with a default-constructed allocator.
-
+				_max_size = _alloc.max_size();
 			};
-			explicit vector(const Allocator& alloc) {
+			vector(const Allocator& alloc) \
+				: _begin(NULL), \
+				_end(NULL), \
+				_size(0), \
+				_capacity(0), \
+				_alloc(Allocator(alloc)) {
 				// (2) Constructs an empty container with the given allocator alloc.
-
+				_max_size = _alloc.max_size();
 			};
-			explicit vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator()) {
+			vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator()) \
+				: _size(count), \
+				_capacity(/* ? */), \
+				_alloc(Allocator(alloc)) {
 				// (3) Constructs the container with count copies of elements with value value.
-
-			};
-			explicit vector(size_type count) {
-				// (4) Constructs the container with count default-inserted instances of T. No copies are made.
-
+				_max_size = _alloc.max_size();
+				/* TODO
+					- capacity 결정
+					- 할당
+					- 값 넣어주기
+					- _begin, _end 결정
+				*/
 			};
 			template<class InputIt>
-			vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) {
+			vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) \
+				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
-
+				_max_size = _alloc.max_size();
+				/* TODO
+					- capacity 결정
+					- 할당
+					- 값 넣어주기
+					- size
+					- _begin, _end 결정
+				*/
 			};
-			vector(const vector& other) {
+			vector(const vector& other) \
+				: _size(other.size()), \
+				_capacity(other.capacity()), \
+				_alloc(other.get_allocator()) {
 				// (6) Copy constructor. Constructs the container with the copy of the contents of other.
-
+				_max_size = _alloc.max_size();
+				/* TODO
+					- 할당
+					- 값 넣어주기
+					- size
+					- _begin, _end 결정
+				*/
 			};
 			~vector() {
-
+				// _alloc.destory()
 			};
 			vector& operator=(const vector& other) {
 				// Copy assignment operator. Replaces the contents with a copy of the contents of other.
@@ -149,23 +185,28 @@ namespace ft
 			};
 			//ANCHOR - Capacity
 			bool empty() const {
-
+				if (_begin == _end)
+					return true;
+				return false;
 			};
 			size_type size() const {
-
+				return _size;
 			};
 			size_type max_size() const {
 				// Returns the maximum number of elements the container is able to hold due to system or library implementation limitations
+				return _max_size;
 			};
 			void reserve(size_type new_cap) {
 				// Increase the capacity of the vector to a value that's greater or equal to new_cap.
 			};
 			size_type capacity() const {
 				// Returns the number of elements that the container has currently allocated space for.
+				return _capacity;
 			};
 			//ANCHOR - Modifiers
 			void clear() {
 				// Erases all elements from the container. After this call, size() returns zero.
+
 			};
 			iterator insert(const_iterator pos, const T& value) {
 				// inserts value before pos.
@@ -194,6 +235,7 @@ namespace ft
 			void resize(size_type count, T value = T()) {
 				// Resizes the container to contain count elements.
 				// If the current size is less than count, additional copies of value are appended.
+
 			};
 			void swap(vector& other) {
 				// Exchanges the contents of the container with those of other.
@@ -203,27 +245,39 @@ namespace ft
 	//ANCHOR - Non-member functions
 	template<class T, class Alloc>
 	bool operator==(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	bool operator!=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (!ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	bool operator<(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()))
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	bool operator<=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (lhs < rhs || lhs == rhs)
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	bool operator>(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (!(lhs <= rhs))
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	bool operator>=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-
+		if (!(lhs < rhs))
+			return true;
+		return false;
 	};
 	template<class T, class Alloc>
 	void swap(ft::vector<T,Alloc>& lhs, ft::vector<T,Alloc>& rhs) {
