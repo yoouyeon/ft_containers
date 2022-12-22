@@ -128,12 +128,14 @@ namespace ft
 				// with bounds checking.
 			};
 			const_reference at(size_type pos) const {
-
+				if (pos >= _size)
+					throw std::length_error("vector (at)");
 			};
 			reference operator[](size_type pos) {
 				// Returns a reference to the element at specified location pos.
 				// No bounds checking is performed.
-
+				if (pos >= _size)
+					throw std::length_error("vector (at)");
 			};
 			const_reference operator[](size_type pos) const {
 
@@ -206,6 +208,8 @@ namespace ft
 			};
 			void reserve(size_type new_cap) {
 				// Increase the capacity of the vector to a value that's greater or equal to new_cap.
+				if (new_cap > _max_size)
+					throw std::length_error("vector (reserve)");
 			};
 			size_type capacity() const {
 				// Returns the number of elements that the container has currently allocated space for.
@@ -249,6 +253,14 @@ namespace ft
 				// Exchanges the contents of the container with those of other.
 				// Does not invoke any move, copy, or swap operations on individual elements.
 			};
+
+			// SECTION - Private
+			void _destruct_at_end(pointer to) {
+				while (to != _end) {
+					_alloc.destory(_end);
+					_end--;
+				}
+			}
 	};
 	//ANCHOR - Non-member functions
 	template<class T, class Alloc>
