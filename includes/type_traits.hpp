@@ -5,6 +5,11 @@
 	- is_integral
 */
 
+/*
+	NOTE - 
+	https://en.cppreference.com/w/cpp/language/types#char16_t
+*/
+
 namespace ft
 {
 	//SECTION - enable_if
@@ -32,7 +37,7 @@ namespace ft
 	template<class T> struct remove_cv<volatile T>       {typedef T type;};
 	template<class T> struct remove_cv<const volatile T> {typedef T type;};
 
-	template<typename> struct is_integral_base: false_type {};
+	template<typename> struct is_integral_base: public false_type {};
 
 	template<> struct is_integral_base<bool>: public true_type {};
 	template<> struct is_integral_base<signed char>: public true_type {};
