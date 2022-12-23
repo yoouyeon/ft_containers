@@ -29,52 +29,47 @@ namespace ft
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 		protected :
 			// ANCHOR - Member variables
-			iterator		_begin;		// null
-			iterator		_end;		// null
+			pointer			_start;		// null
 			size_type		_size;		// 0
 			size_type		_capacity;	// 0
 			allocator_type	_alloc;		// Allocator()
-			size_type		_max_size;	// _alloc.max_size()
 		public :
 			//ANCHOR - Member functions
-			vector() \
+			explicit vector() \
 				: _begin(NULL), \
-				-end(NULL), \
 				_size(0), \
 				_capacity(0), \
 				_alloc(Allocator()) {
 				// (1) Default constructor. Constructs an empty container with a default-constructed allocator.
-				_max_size = _alloc.max_size();
 			};
-			vector(const Allocator& alloc) \
+			explicit vector(const Allocator& alloc) \
 				: _begin(NULL), \
-				_end(NULL), \
 				_size(0), \
 				_capacity(0), \
 				_alloc(Allocator(alloc)) {
 				// (2) Constructs an empty container with the given allocator alloc.
-				_max_size = _alloc.max_size();
 			};
-			vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator()) \
+			explicit vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator()) \
 				: _size(count), \
-				_capacity(/* ? */), \
 				_alloc(Allocator(alloc)) {
 				// (3) Constructs the container with count copies of elements with value value.
-				_max_size = _alloc.max_size();
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
+				// _capacity = /* ? */;
+				_start = _alloc.allocate(_capacity);
+				for (size_type i = 0; i < count; i++)
+					_alloc.construct(&_start[i], value);
 				/* TODO
 					- capacity 결정
-					- 할당
-					- 값 넣어주기
-					- _begin, _end 결정
+					- 할당 ✔️
+					- 값 넣어주기 ✔️
+					- _begin 결정 ✔️
 				*/
 			};
 			template<class InputIt>
-			vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) \
+			explicit vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) \
 				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
-				_max_size = _alloc.max_size();
 				_size = std::distance(last, first);
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
@@ -83,20 +78,19 @@ namespace ft
 					- 할당
 					- 값 넣어주기
 					- size
-					- _begin, _end 결정
+					- _begin 결정
 				*/
 			};
-			vector(const vector& other) \
+			explicit vector(const vector& other) \
 				: _size(other.size()), \
 				_capacity(other.capacity()), \
 				_alloc(other.get_allocator()) {
 				// (6) Copy constructor. Constructs the container with the copy of the contents of other.
-				_max_size = _alloc.max_size();
 				/* TODO
 					- 할당
 					- 값 넣어주기
 					- size
-					- _begin, _end 결정
+					- _begin 결정
 				*/
 			};
 			~vector() {
@@ -165,37 +159,38 @@ namespace ft
 			iterator begin() {
 				// Returns an iterator to the first element of the vector.
 				// If the vector is empty, the returned iterator will be equal to end().
+				return iterator(_start);
 			};
 			const_iterator begin() const {
-
+				return const_iterator(_start);
 			};
 			iterator end() {
 				// Returns an iterator to the element following the last element of the vector.
 				// attempting to access it results in undefined behavior.
-
+				return iterator(_start + _size);
 			};
 			const_iterator end() const {
-				
+				return const_iterator(_start + _size);
 			};
 			reverse_iterator rbegin() {
 				// Returns a reverse iterator to the first element of the reversed vector.
 				// If the vector is empty, the returned iterator is equal to rend().
-
+				return reverse_iterator(this->end());
 			};
 			const_reverse_iterator rbegin() const {
-
+				return const_reverse_iterator(this->end());
 			};
 			reverse_iterator rend() {
 				// Returns a reverse iterator to the element following the last element of the reversed vector.
 				// attempting to access it results in undefined behavior.
-
+				return reverse_iterator(this->begin());
 			};
 			const_reverse_iterator rend() const {
-
+				return const_reverse_iterator(this->begin());
 			};
 			//ANCHOR - Capacity
 			bool empty() const {
-				if (_begin == _end)
+				if (_size == 0)
 					return true;
 				return false;
 			};
@@ -204,11 +199,11 @@ namespace ft
 			};
 			size_type max_size() const {
 				// Returns the maximum number of elements the container is able to hold due to system or library implementation limitations
-				return _max_size;
+				return _alloc.max_size();
 			};
 			void reserve(size_type new_cap) {
 				// Increase the capacity of the vector to a value that's greater or equal to new_cap.
-				if (new_cap > _max_size)
+				if (new_cap > _alloc.max_size())
 					throw std::length_error("vector (reserve)");
 			};
 			size_type capacity() const {
@@ -256,10 +251,7 @@ namespace ft
 
 			// SECTION - Private
 			void _destruct_at_end(pointer to) {
-				while (to != _end) {
-					_alloc.destory(_end);
-					_end--;
-				}
+				// 끝부터 to까지의 메모리 해제
 			}
 	};
 	//ANCHOR - Non-member functions
