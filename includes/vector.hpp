@@ -73,12 +73,15 @@ namespace ft
 				_size = std::distance(last, first);
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
+				// _capacity = /* ? */;
+				_start = _alloc.allocate(_capacity);
+				this->assign(first, last);
 				/* TODO
 					- capacity 결정
-					- 할당
-					- 값 넣어주기
-					- size
-					- _begin 결정
+					- 할당 ✔️
+					- 값 넣어주기 ✔️
+					- size ✔️
+					- _begin 결정 ✔️
 				*/
 			};
 			explicit vector(const vector& other) \
@@ -86,23 +89,38 @@ namespace ft
 				_capacity(other.capacity()), \
 				_alloc(other.get_allocator()) {
 				// (6) Copy constructor. Constructs the container with the copy of the contents of other.
+				_start = _alloc.allocate(_capacity);
+				for (size_type i = 0; i < _size; i++) {
+					_alloc.construct(&_start[i], other[i]);
+				}
 				/* TODO
-					- 할당
-					- 값 넣어주기
-					- size
-					- _begin 결정
+					- 할당 ✔️
+					- 값 넣어주기 ✔️
+					- size ✔️
+					- _begin 결정 ✔️
 				*/
 			};
 			~vector() {
-				// _alloc.destory()
+				this->clear();
+				_alloc.deallocate(_start, _capacity);
 			};
 			vector& operator=(const vector& other) {
 				// Copy assignment operator. Replaces the contents with a copy of the contents of other.
+				if (*this == other)
+					return *this;
+				/*
+					테스트 결과
+					this->capacity() > other.capacity() 인 경우에도 this->capacity()가 그대로
+						-> 필요하지 않으면 재할당 안함.
+				*/
+				this->assign(other.begin(), other.end());
+				return *this;
 			};
 			void assign(size_type count, const T& value) {
 				// Replaces the contents with count copies of value value
 				if (count < 0)
 					throw std::length_error("vector (assign)");
+				// push_back을 반복하는 방식으로 구현되어있음.
 			};
 			template<class InputIt>
 			void assign(InputIt first, InputIt last) {
