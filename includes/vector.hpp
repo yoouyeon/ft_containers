@@ -120,15 +120,30 @@ namespace ft
 				// Replaces the contents with count copies of value value
 				if (count < 0)
 					throw std::length_error("vector (assign)");
-				// push_back을 반복하는 방식으로 구현되어있음.
+				this->clear();
+				/* TODO - capacity를 count와 동일하게 해 줘도 될까?*/
+				if (_capacity < count)
+					this->reserve(count);
+				for (size_type i = 0; i < _count; i++)
+					_alloc.construct(&_start[i], value);
 			};
 			template<class InputIt>
 			void assign(InputIt first, InputIt last) {
 				// Replaces the contents with copies of those in the range [first, last).
 				// The behavior is undefined if either argument is an iterator into *this.
-				size_type range = std::distance(first, last);
+				size_type _range = std::distance(first, last);
 				if (range < 0)
 					throw std::length_error("vector (assign)");
+				this->clear();
+				/* TODO - capacity를 count와 동일하게 해 줘도 될까?*/
+				if (_capacity < range)
+					this->reserve(range);
+				// vector<bool> 의 경우에는 push_back을 반복하는 구조로 구현됨.
+				// for (; first != last; first++)
+				// 	this->push_back(*first);
+				for (size_type i = 0; i < range; i++, first++) {
+					_alloc.construct(&_start[i], *first);
+				}
 			};
 			allocator_type get_allocator() const {
 				// Returns the allocator associated with the container.
@@ -138,40 +153,46 @@ namespace ft
 			reference at(size_type pos) {
 				// Returns a reference to the element at specified location pos
 				// with bounds checking.
+				if (pos >= _size)
+					throw std::length_error("vector (at)");
+				return _start[pos];
 			};
 			const_reference at(size_type pos) const {
 				if (pos >= _size)
 					throw std::length_error("vector (at)");
+				return _start[pos];
 			};
 			reference operator[](size_type pos) {
 				// Returns a reference to the element at specified location pos.
 				// No bounds checking is performed.
-				if (pos >= _size)
-					throw std::length_error("vector (at)");
+				return _start[pos];
 			};
 			const_reference operator[](size_type pos) const {
-
+				return _start[pos];
 			};
 			reference front() {
 				// Returns a reference to the first element in the container.
 				// Calling front on an empty container is undefined.
-
+				return _start[0];
 			};
 			const_reference front() const {
-
+				return _start[0];
 			};
 			reference back() {
 				// Returns a reference to the last element in the container.
 				// Calling back on an empty container causes undefined behavior.
+				return _start[_size - 1];
 			};
 			const_reference back() const {
-
+				return _start[_size - 1];
 			};
 			T* data() {
 				// Returns pointer to the underlying array serving as element storage.
+				// 첫 데이터의 주소값을 반환한다.
+				return _start;
 			};
 			const T* data() const {
-
+				return _start;
 			};
 			//ANCHOR - Iterators
 			iterator begin() {
@@ -223,6 +244,18 @@ namespace ft
 				// Increase the capacity of the vector to a value that's greater or equal to new_cap.
 				if (new_cap > _alloc.max_size())
 					throw std::length_error("vector (reserve)");
+				if (new_cap > 0 && new_cap > _capacity) {
+					// 기존것 temp에 저장
+					pointer temp = _start;
+					// 새로운 _start
+					_start = _alloc.allocate(new_cap);
+					_capacity = new_cap;
+					for (size_type i = 0; i < _size; i++) {
+						_alloc.construct(&_start[i], temp[i]);
+						_alloc.destroy(&temp[i]);
+					}
+					_alloc.deallocate(temp, _capacity);
+				}
 			};
 			size_type capacity() const {
 				// Returns the number of elements that the container has currently allocated space for.
@@ -231,7 +264,10 @@ namespace ft
 			//ANCHOR - Modifiers
 			void clear() {
 				// Erases all elements from the container. After this call, size() returns zero.
-
+				for (size_type i = 0; i < _size; i++) {
+					_alloc.destroy(&_start[i]);
+				}
+				_size = 0;
 			};
 			iterator insert(const_iterator pos, const T& value) {
 				// inserts value before pos.
