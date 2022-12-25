@@ -52,16 +52,16 @@ namespace ft
 			};
 			explicit vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator()) \
 				: _size(count), \
+				_capacity(count), \
 				_alloc(Allocator(alloc)) {
 				// (3) Constructs the container with count copies of elements with value value.
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
-				// _capacity = /* ? */;
 				_start = _alloc.allocate(_capacity);
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&_start[i], value);
 				/* TODO
-					- capacity 결정
+					- capacity 결정 ✔️
 					- 할당 ✔️
 					- 값 넣어주기 ✔️
 					- _begin 결정 ✔️
@@ -74,11 +74,11 @@ namespace ft
 				_size = std::distance(last, first);
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
-				// _capacity = /* ? */;
+				_capacity = _size;
 				_start = _alloc.allocate(_capacity);
 				this->assign(first, last);
 				/* TODO
-					- capacity 결정
+					- capacity 결정 ✔️
 					- 할당 ✔️
 					- 값 넣어주기 ✔️
 					- size ✔️
@@ -122,7 +122,6 @@ namespace ft
 				if (count < 0)
 					throw std::length_error("vector (assign)");
 				this->clear();
-				/* TODO - capacity를 count와 동일하게 해 줘도 될까?*/
 				if (_capacity < count)
 					this->reserve(count);
 				for (size_type i = 0; i < _count; i++)
@@ -136,12 +135,9 @@ namespace ft
 				if (range < 0)
 					throw std::length_error("vector (assign)");
 				this->clear();
-				/* TODO - capacity를 count와 동일하게 해 줘도 될까?*/
 				if (_capacity < range)
 					this->reserve(range);
 				// vector<bool> 의 경우에는 push_back을 반복하는 구조로 구현됨.
-				// for (; first != last; first++)
-				// 	this->push_back(*first);
 				for (size_type i = 0; i < range; i++, first++) {
 					_alloc.construct(&_start[i], *first);
 				}
@@ -199,18 +195,18 @@ namespace ft
 			iterator begin() {
 				// Returns an iterator to the first element of the vector.
 				// If the vector is empty, the returned iterator will be equal to end().
-				return iterator(_start);
+				return vector_iterator(_start);
 			};
 			const_iterator begin() const {
-				return const_iterator(_start);
+				return vector_iterator(_start);
 			};
 			iterator end() {
 				// Returns an iterator to the element following the last element of the vector.
 				// attempting to access it results in undefined behavior.
-				return iterator(_start + _size);
+				return vector_iterator(_start + _size);
 			};
 			const_iterator end() const {
-				return const_iterator(_start + _size);
+				return vector_iterator(_start + _size);
 			};
 			reverse_iterator rbegin() {
 				// Returns a reverse iterator to the first element of the reversed vector.
@@ -272,36 +268,54 @@ namespace ft
 			};
 			iterator insert(const_iterator pos, const T& value) {
 				// inserts value before pos.
-				/* TODO
-					- insert(pos, 1, value) 호출?
-				*/
+				return this->insert(pos, 1, value);
 			};
 			iterator insert(const_iterator pos, size_type count, const T& value) {
 				// inserts count copies of the value before pos.
+				size_type new_size = _size + count;
+				if (_capacity < new_size)
+					this->reserve(_new_capacity(new_size));
+				pointer ptr = _start + (pos - _start);
+				std::copy_backward(ptr, _start + _size, _start + new_size);
+				for (size_type i = 0; i < count; i++)
+					_alloc.construct(&ptr[i], value);
+				_size = new_size;
+				return vector_iterator(ptr);
 				/* TODO
-					- 늘어나는 capacity에 맞게 재할당.
-					- pos에 대한 iterator/pointer 결정
-					- 기존 것 pos 앞까지 복사
-					- pos 복사
-					- 기존 것 pos 뒤부터 복사
-					- pos iterator 반환
+					- pos에 대한 iterator/pointer 결정 ✔️
+					- 뒤에서부터 pos 전까지 복사 ✔️
+						-> 값이 계속 변경되기 때문에 뒤에서부터 복사해야 함. => copy_backward
+					- 복사한 앞에서부터 value 복사 ✔️
+					- pos iterator 반환 ✔️
 				*/
 			};
 			template< class InputIt >
 			iterator insert(const_iterator pos, InputIt first, InputIt last) {
 				// inserts elements from range [first, last) before pos.
 				// This overload has the same effect as overload (3) if InputIt is an integral type.
+				size_type new_size = _size + std::distance(last - first);
+				if (_capacity < new_size)
+					this->reserve(_new_capacity(new_size));
+				pointer ptr = _start + (pos - _start);
+				std::copy_backward(ptr, _start + _size, _start + new_size);
+				std::copy(first, last, ptr);
+				_size = new_size;
+				return vector_iterator(ptr);
 				/* TODO
-					- 늘어나는 capacity에 맞게 재할당.
-					- pos에 대한 iterator/pointer 결정
-					- 기존 것 pos 앞까지 복사
-					- pos 복사 (iterator 고려하기)
-					- 기존 것 pos 뒤부터 복사
-					- pos iterator 반환
+					- pos에 대한 iterator/pointer 결정 ✔️
+					- 뒤에서부터 pos 전까지 복사 ✔️
+						-> 값이 계속 변경되기 때문에 뒤에서부터 복사해야 함. => copy_backward
+					- 복사한 앞에서부터 복사 (iterator 고려하기) ✔️
+					- pos iterator 반환 ✔️
 				*/
 			};
 			iterator erase(iterator pos) {
 				// Removes the element at pos.
+				pointer ptr = _start + (pos - _start);
+				_alloc.destroy(ptr);
+				std::copy(ptr + 1, _start + _size, ptr);
+				_size--;
+				return vector_iterator(ptr);
 				/* TODO
 					- pos iterator 결정
 					- pos destroy
@@ -311,6 +325,13 @@ namespace ft
 			};
 			iterator erase(iterator first, iterator last) {
 				// Removes the elements in the range [first, last).
+				pointer ptr = _start + (first - _start);
+				for (pointer p = ptr; p != last; p++) {
+					_alloc.destroy(p);
+				}
+				std::copy(ptr + 1, _start + _size, ptr);
+				_size -= last - first;
+				return vector_iterator(ptr);
 				/* TODO
 					- range, first, last iterator 결정
 					- first 부터 range destroy
@@ -320,6 +341,11 @@ namespace ft
 			};
 			void push_back(const T& value) {
 				// Appends the given element value to the end of the container.
+				size_type new_size = _size + 1;
+				if (_capacity < new_size)
+					this->reserve(_new_capacity(new_size));
+				_alloc.construct(&_start[_size], value);
+				_size = new_size;
 				/* TODO
 					- 늘어나야 하는 capacity에 맞게 reserve
 					- _size 위치에 construct
@@ -335,6 +361,17 @@ namespace ft
 			void resize(size_type count, T value = T()) {
 				// Resizes the container to contain count elements.
 				// If the current size is less than count, additional copies of value are appended.
+				if (count < _size) {
+					while (_size == _count)
+						this->pop_back();
+				}
+				else if (count > _size) {
+					reserve(count);
+					while (_size != count) {
+						_alloc.construct(&_start[_size - 1], value);
+						_size++;
+					}
+				}
 				/* TODO
 					- count가 size보다 작은 경우 
 						-> size가 동일해질때까지 pop (연속적인 호출보다 좋은 방법이 있을듯)
@@ -353,9 +390,12 @@ namespace ft
 				std::swap(_alloc, other._alloc);
 			};
 
-			// ANCHOR - Private
-			void _destruct_at_end(pointer to) {
-				// 끝부터 to까지의 메모리 해제
+		// ANCHOR - private functions
+		private:
+			size_type _new_capacity(size_type size) {
+				if (size > _capacity)
+					return _capacity * 2;
+				return _capacity;
 			}
 	};
 	//ANCHOR - Non-member functions
