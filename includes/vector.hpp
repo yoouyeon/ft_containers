@@ -399,6 +399,7 @@ namespace ft
 	void swap(ft::vector<T,Alloc>& lhs, ft::vector<T,Alloc>& rhs) {
 		// Specializes the std::swap algorithm for ft::vector.
 		// Swaps the contents of lhs and rhs. Calls lhs.swap(rhs).
+		lhs.swap(rhs);
 	};
 }
 
