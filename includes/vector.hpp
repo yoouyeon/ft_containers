@@ -346,6 +346,11 @@ namespace ft
 			void swap(vector& other) {
 				// Exchanges the contents of the container with those of other.
 				// Does not invoke any move, copy, or swap operations on individual elements.
+				// 멤버변수들만 바꿔주면 됨
+				std::swap(_start, other._start);
+				std::swap(_size, other._size);
+				std::swap(_capacity, other.capacity);
+				std::swap(_alloc, other._alloc);
 			};
 
 			// ANCHOR - Private
