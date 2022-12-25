@@ -3,6 +3,7 @@
 
 #include <memory>		// allocator
 #include <exception>	// exception
+#include <algorithm>	// swap
 #include "vector_iterator.hpp"
 #include "reverse_iterator.hpp"
 #include "algorithm.hpp"
@@ -271,39 +272,83 @@ namespace ft
 			};
 			iterator insert(const_iterator pos, const T& value) {
 				// inserts value before pos.
+				/* TODO
+					- insert(pos, 1, value) 호출?
+				*/
 			};
 			iterator insert(const_iterator pos, size_type count, const T& value) {
 				// inserts count copies of the value before pos.
+				/* TODO
+					- 늘어나는 capacity에 맞게 재할당.
+					- pos에 대한 iterator/pointer 결정
+					- 기존 것 pos 앞까지 복사
+					- pos 복사
+					- 기존 것 pos 뒤부터 복사
+					- pos iterator 반환
+				*/
 			};
 			template< class InputIt >
 			iterator insert(const_iterator pos, InputIt first, InputIt last) {
 				// inserts elements from range [first, last) before pos.
 				// This overload has the same effect as overload (3) if InputIt is an integral type.
+				/* TODO
+					- 늘어나는 capacity에 맞게 재할당.
+					- pos에 대한 iterator/pointer 결정
+					- 기존 것 pos 앞까지 복사
+					- pos 복사 (iterator 고려하기)
+					- 기존 것 pos 뒤부터 복사
+					- pos iterator 반환
+				*/
 			};
 			iterator erase(iterator pos) {
 				// Removes the element at pos.
+				/* TODO
+					- pos iterator 결정
+					- pos destroy
+					- pos 뒤의 것들 "한칸" 앞으로 construct, 기존 것 destroy
+					- pos iterator 반환
+				*/
 			};
 			iterator erase(iterator first, iterator last) {
 				// Removes the elements in the range [first, last).
+				/* TODO
+					- range, first, last iterator 결정
+					- first 부터 range destroy
+					- last 뒤의 것들 range 앞으로 construct, 기존 것 destroy
+					- first iterator 반환
+				*/
 			};
 			void push_back(const T& value) {
 				// Appends the given element value to the end of the container.
+				/* TODO
+					- 늘어나야 하는 capacity에 맞게 reserve
+					- _size 위치에 construct
+					- _size 증가
+				*/
 			};
 			void pop_back() {
 				// Removes the last element of the container.
 				// Calling pop_back on an empty container results in undefined behavior.
+				_alloc.destroy(&_start[_size - 1]);
+				_size--;
 			};
 			void resize(size_type count, T value = T()) {
 				// Resizes the container to contain count elements.
 				// If the current size is less than count, additional copies of value are appended.
-
+				/* TODO
+					- count가 size보다 작은 경우 
+						-> size가 동일해질때까지 pop (연속적인 호출보다 좋은 방법이 있을듯)
+					- count가 size보다 큰 경우
+						-> 늘어냐야 하는 capacity에 맞게 reserve
+						-> _size가 동일해질 때까지 construct value
+				*/
 			};
 			void swap(vector& other) {
 				// Exchanges the contents of the container with those of other.
 				// Does not invoke any move, copy, or swap operations on individual elements.
 			};
 
-			// SECTION - Private
+			// ANCHOR - Private
 			void _destruct_at_end(pointer to) {
 				// 끝부터 to까지의 메모리 해제
 			}
