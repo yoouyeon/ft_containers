@@ -32,101 +32,101 @@ namespace ft
 			operator vector_iterator<const T>(void) const { 
 				return vector_iterator<const T>(this->_ptr);
 			};
-	protected:
-		pointer _ptr;
+		protected:
+			pointer _ptr;
 
-	public:
-		vector_iterator &operator++(void) {
-			_ptr++;
-			return *this;
-		};
+		public:
+			vector_iterator &operator++(void) {
+				_ptr++; 
+				return *this;
+			};
 
-		vector_iterator &operator--(void) {
-			_ptr--;
-			return *this;
-		};
+			vector_iterator &operator--(void) {
+				_ptr--;
+				return *this;
+			};
 
-		vector_iterator operator++(int) {
-			vector_iterator temp(*this);
-			_ptr++;
-			return temp;
-		};
+			vector_iterator operator++(int) {
+				vector_iterator temp(*this);
+				_ptr++;
+				return temp;
+			};
 
-		vector_iterator operator--(int) {
-			vector_iterator temp(*this);
-			_ptr--;
-			return temp;
-		};
+			vector_iterator operator--(int) {
+				vector_iterator temp(*this);
+				_ptr--;
+				return temp;
+			};
 
-		bool operator == (const vector_iterator<const T> &other) const {
-			return _ptr == other.base();
-		}
+			bool operator == (const vector_iterator<const T> &other) const {
+				return _ptr == other.base();
+			}
 
-		bool operator != (const vector_iterator<const T> &other) const {
-			return _ptr != other.base();
-		}
+			bool operator != (const vector_iterator<const T> &other) const {
+				return _ptr != other.base();
+			}
 
-		bool operator > (const vector_iterator<const T> &other) const {
-			return _ptr > other.base();
-		}
+			bool operator > (const vector_iterator<const T> &other) const {
+				return _ptr > other.base();
+			}
 
-		bool operator >= (const vector_iterator<const T> &other) const {
-			return (_ptr >= other.base());
-		}
+			bool operator >= (const vector_iterator<const T> &other) const {
+				return (_ptr >= other.base());
+			}
 
-		bool operator < (const vector_iterator<const T> &other) const {
-			return (_ptr < other.base());
-		}
+			bool operator < (const vector_iterator<const T> &other) const {
+				return (_ptr < other.base());
+			}
 
-		bool operator <= (const vector_iterator<const T> &other) const {
-			return (_ptr <= other.base());
-		}
+			bool operator <= (const vector_iterator<const T> &other) const {
+				return (_ptr <= other.base());
+			}
 
-		value_type &operator * (void) {
-			return (*_ptr);
-		}
+			value_type &operator * (void) {
+				return (*_ptr);
+			}
 
-		value_type *operator -> (void) {
-			return (_ptr);
-		}
+			value_type *operator -> (void) {
+				return (_ptr);
+			}
 
-		vector_iterator operator + (int n) const {
-			vector_iterator temp(*this);
-			temp += n;
-			return (temp);
-		}
+			vector_iterator operator + (int n) const {
+				vector_iterator temp(*this);
+				temp += n;
+				return (temp);
+			}
 
-		vector_iterator operator - (int n) const {
-			vector_iterator temp(*this);
-			temp -= n;
-			return (temp);
-		}
+			vector_iterator operator - (int n) const {
+				vector_iterator temp(*this);
+				temp -= n;
+				return (temp);
+			}
 
-		friend vector_iterator	operator + (std::ptrdiff_t n, vector_iterator it) {
-            vector_iterator temp(it.base());
-            temp += n;
-            return (temp);
-        }
+			friend vector_iterator	operator + (std::ptrdiff_t n, vector_iterator it) {
+				vector_iterator temp(it.base());
+				temp += n;
+				return (temp);
+			}
 
-		int		operator - (vector_iterator<const T> const &other) const {
-			return _ptr - other.base();
-		}
+			difference_type		operator - (vector_iterator<const T> const &other) const {
+				return _ptr - other.base();
+			}
 
-		vector_iterator &operator += (int n) {
-			_ptr += n;
-			return *this;
-		}
+			vector_iterator &operator += (int n) {
+				_ptr += n;
+				return *this;
+			}
 
-		vector_iterator &operator -= (int n) {
-			_ptr -= n;
-			return *this;
-		}
+			vector_iterator &operator -= (int n) {
+				_ptr -= n;
+				return *this;
+			}
 
-		value_type &operator [] (int n) const {
-			return _ptr[n];
-		}
+			value_type &operator [] (int n) const {
+				return _ptr[n];
+			}
 	};
-
+	
 }
 
 #endif

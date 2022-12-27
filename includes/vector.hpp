@@ -127,6 +127,7 @@ namespace ft
 					this->reserve(count);
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&_start[i], value);
+				_size = count;
 			};
 			template<class InputIt>
 			void assign(InputIt first, InputIt last, typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) {
@@ -142,6 +143,7 @@ namespace ft
 				for (size_type i = 0; i < range; i++, first++) {
 					_alloc.construct(&_start[i], *first);
 				}
+				_size = range;
 			};
 			allocator_type get_allocator() const {
 				// Returns the allocator associated with the container.
@@ -152,12 +154,12 @@ namespace ft
 				// Returns a reference to the element at specified location pos
 				// with bounds checking.
 				if (pos >= _size)
-					throw std::length_error("vector (at)");
+					throw std::out_of_range("vector (at)");
 				return _start[pos];
 			};
 			const_reference at(size_type pos) const {
 				if (pos >= _size)
-					throw std::length_error("vector (at)");
+					throw std::out_of_range("vector (at)");
 				return _start[pos];
 			};
 			reference operator[](size_type pos) {
@@ -274,9 +276,10 @@ namespace ft
 			iterator insert(const_iterator pos, size_type count, const T& value) {
 				// inserts count copies of the value before pos.
 				size_type new_size = _size + count;
+				pointer old_start = _start;
 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
-				pointer ptr = _start + (pos - _start);
+				pointer ptr = _start + (pos - old_start);
 				std::copy_backward(ptr, _start + _size, _start + new_size);
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&ptr[i], value);
@@ -291,13 +294,14 @@ namespace ft
 				*/
 			};
 			template< class InputIt >
-			iterator insert(const_iterator pos, InputIt first, InputIt last, typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) {
+			iterator insert(iterator pos, InputIt first, InputIt last, typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) {
 				// inserts elements from range [first, last) before pos.
 				// This overload has the same effect as overload (3) if InputIt is an integral type.
-				size_type new_size = _size + std::distance(last, first);
-				if (_capacity < new_size)
+				iterator old_start = iterator(_start);
+				size_type new_size = _size + std::distance(first, last);
+ 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
-				pointer ptr = _start + (pos - _start);
+				pointer ptr = _start + (pos - old_start);
 				std::copy_backward(ptr, _start + _size, _start + new_size);
 				std::copy(first, last, ptr);
 				_size = new_size;
