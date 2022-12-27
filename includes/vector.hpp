@@ -8,6 +8,7 @@
 #include "reverse_iterator.hpp"
 #include "algorithm.hpp"
 #include "type_traits.hpp"
+#include <iostream>
 
 namespace ft
 {
@@ -72,7 +73,7 @@ namespace ft
 			explicit vector(InputIt first, InputIt last, const Allocator& alloc = Allocator(), typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) \
 				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
-				_size = std::distance(last, first);
+				_size = std::distance(first, last);
 				if (_size < 0)
 					throw std::length_error("vector (constructor)");
 				_capacity = _size;
@@ -276,13 +277,13 @@ namespace ft
 			iterator insert(const_iterator pos, size_type count, const T& value) {
 				// inserts count copies of the value before pos.
 				size_type new_size = _size + count;
-				pointer old_start = _start;
+				iterator old_start = iterator(_start);
 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
 				pointer ptr = _start + (pos - old_start);
-				std::copy_backward(ptr, _start + _size, _start + new_size);
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&ptr[i], value);
+				std::copy_backward(ptr, _start + _size, _start + new_size);
 				_size = new_size;
 				return iterator(ptr);
 				/* TODO
@@ -330,12 +331,13 @@ namespace ft
 			};
 			iterator erase(iterator first, iterator last) {
 				// Removes the elements in the range [first, last).
-				iterator ptr = _start + (first - _start);
-				iterator start = this->begin();
-				for (iterator p = ptr; p != last; p++) {
+				iterator startIter = this->begin();
+				iterator ptr = _start + (first - startIter);
+				iterator lastIter = this->begin() + (last - startIter);
+				for (iterator p = ptr; p != lastIter; p++) {
 					_alloc.destroy(&(*p));
 				}
-				std::copy(ptr + 1, start + _size, ptr);
+				std::copy(lastIter, this->end(), ptr);
 				_size -= last - first;
 				return iterator(ptr);
 				/* TODO
@@ -399,9 +401,17 @@ namespace ft
 		// ANCHOR - private functions
 		private:
 			size_type _new_capacity(size_type size) {
-				if (size > _capacity)
-					return _capacity * 2;
-				return _capacity;
+				size_type new_capacity;
+				if (_capacity == 0)
+					new_capacity = 1;
+				else
+					new_capacity = _capacity;
+				if (size > _capacity) {
+					while (size > new_capacity)
+						new_capacity *= 2;
+					return new_capacity;
+				}
+				return new_capacity;
 			}
 	};
 	//ANCHOR - Non-member functions
