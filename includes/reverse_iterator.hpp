@@ -10,11 +10,11 @@ namespace ft
 		public :
 			// ANCHOR - Member types
 			typedef Iter											iterator_type;
-			typedef ft::iterator_traits<Iter>::iterator_category	iterator_category;
-			typedef ft::iterator_traits<Iter>::value_type			value_type;
-			typedef ft::iterator_traits<Iter>::difference_type		difference_type;
-			typedef ft::iterator_traits<Iter>::pointer				pointer;
-			typedef ft::iterator_traits<Iter>::reference			reference;
+			typedef typename ft::iterator_traits<Iter>::iterator_category	iterator_category;
+			typedef typename ft::iterator_traits<Iter>::value_type			value_type;
+			typedef typename ft::iterator_traits<Iter>::difference_type		difference_type;
+			typedef typename ft::iterator_traits<Iter>::pointer				pointer;
+			typedef typename ft::iterator_traits<Iter>::reference			reference;
 			// ANCHOR - Member functions
 			reverse_iterator() {
 				// Default constructor. The underlying iterator is value-initialized.
@@ -28,7 +28,7 @@ namespace ft
 			};
 			template< class U >
 			reverse_iterator& operator=(const reverse_iterator<U>& other) {
-				if (this != &other)
+				if (*this != other)
 					current = other.base();
 				return *this;
 			};
@@ -115,7 +115,7 @@ namespace ft
 	};
 	template< class Iterator1, class Iterator2 >
 	typename reverse_iterator<Iterator1>::difference_type operator-(const reverse_iterator<Iterator1>& lhs, const reverse_iterator<Iterator2>& rhs) {
-		return reverse_iterator<Iter>(it.base() - n);
+		return lhs.base() - rhs.base();
 	};
 }
 

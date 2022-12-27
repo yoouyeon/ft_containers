@@ -7,6 +7,7 @@
 #include "vector_iterator.hpp"
 #include "reverse_iterator.hpp"
 #include "algorithm.hpp"
+#include "type_traits.hpp"
 
 namespace ft
 {
@@ -23,9 +24,9 @@ namespace ft
 			typedef typename allocator_type::pointer			pointer;
 			typedef typename allocator_type::const_pointer		const_pointer;
 			// typedef pointer										iterator;		// 이게 맞나
-			typedef typename vector_iterator<value_type>			iterator;
+			typedef ft::vector_iterator<value_type>			iterator;
 			// typedef const_pointer								const_iterator;	// 이게 맞나
-			typedef typename vector_iterator<const value_type>		const_iterator;
+			typedef ft::vector_iterator<const value_type>		const_iterator;
 			typedef ft::reverse_iterator<iterator>				reverse_iterator;
 			typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 		protected :
@@ -37,14 +38,14 @@ namespace ft
 		public :
 			//ANCHOR - Member functions
 			explicit vector() \
-				: _begin(NULL), \
+				: _start(NULL), \
 				_size(0), \
 				_capacity(0), \
 				_alloc(Allocator()) {
 				// (1) Default constructor. Constructs an empty container with a default-constructed allocator.
 			};
 			explicit vector(const Allocator& alloc) \
-				: _begin(NULL), \
+				: _start(NULL), \
 				_size(0), \
 				_capacity(0), \
 				_alloc(Allocator(alloc)) {
@@ -64,11 +65,11 @@ namespace ft
 					- capacity 결정 ✔️
 					- 할당 ✔️
 					- 값 넣어주기 ✔️
-					- _begin 결정 ✔️
+					- _start 결정 ✔️
 				*/
 			};
 			template<class InputIt>
-			explicit vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) \
+			explicit vector(InputIt first, InputIt last, const Allocator& alloc = Allocator(), typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) \
 				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
 				_size = std::distance(last, first);
@@ -82,7 +83,7 @@ namespace ft
 					- 할당 ✔️
 					- 값 넣어주기 ✔️
 					- size ✔️
-					- _begin 결정 ✔️
+					- _start 결정 ✔️
 				*/
 			};
 			explicit vector(const vector& other) \
@@ -98,7 +99,7 @@ namespace ft
 					- 할당 ✔️
 					- 값 넣어주기 ✔️
 					- size ✔️
-					- _begin 결정 ✔️
+					- _start 결정 ✔️
 				*/
 			};
 			~vector() {
@@ -124,14 +125,14 @@ namespace ft
 				this->clear();
 				if (_capacity < count)
 					this->reserve(count);
-				for (size_type i = 0; i < _count; i++)
+				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&_start[i], value);
 			};
 			template<class InputIt>
-			void assign(InputIt first, InputIt last) {
+			void assign(InputIt first, InputIt last, typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) {
 				// Replaces the contents with copies of those in the range [first, last).
 				// The behavior is undefined if either argument is an iterator into *this.
-				size_type _range = std::distance(first, last);
+				size_type range = std::distance(first, last);
 				if (range < 0)
 					throw std::length_error("vector (assign)");
 				this->clear();
@@ -195,18 +196,18 @@ namespace ft
 			iterator begin() {
 				// Returns an iterator to the first element of the vector.
 				// If the vector is empty, the returned iterator will be equal to end().
-				return vector_iterator(_start);
+				return iterator(_start);
 			};
 			const_iterator begin() const {
-				return vector_iterator(_start);
+				return const_iterator(_start);
 			};
 			iterator end() {
 				// Returns an iterator to the element following the last element of the vector.
 				// attempting to access it results in undefined behavior.
-				return vector_iterator(_start + _size);
+				return iterator(_start + _size);
 			};
 			const_iterator end() const {
-				return vector_iterator(_start + _size);
+				return const_iterator(_start + _size);
 			};
 			reverse_iterator rbegin() {
 				// Returns a reverse iterator to the first element of the reversed vector.
@@ -280,7 +281,7 @@ namespace ft
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&ptr[i], value);
 				_size = new_size;
-				return vector_iterator(ptr);
+				return iterator(ptr);
 				/* TODO
 					- pos에 대한 iterator/pointer 결정 ✔️
 					- 뒤에서부터 pos 전까지 복사 ✔️
@@ -290,17 +291,17 @@ namespace ft
 				*/
 			};
 			template< class InputIt >
-			iterator insert(const_iterator pos, InputIt first, InputIt last) {
+			iterator insert(const_iterator pos, InputIt first, InputIt last, typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) {
 				// inserts elements from range [first, last) before pos.
 				// This overload has the same effect as overload (3) if InputIt is an integral type.
-				size_type new_size = _size + std::distance(last - first);
+				size_type new_size = _size + std::distance(last, first);
 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
 				pointer ptr = _start + (pos - _start);
 				std::copy_backward(ptr, _start + _size, _start + new_size);
 				std::copy(first, last, ptr);
 				_size = new_size;
-				return vector_iterator(ptr);
+				return iterator(ptr);
 				/* TODO
 					- pos에 대한 iterator/pointer 결정 ✔️
 					- 뒤에서부터 pos 전까지 복사 ✔️
@@ -315,7 +316,7 @@ namespace ft
 				_alloc.destroy(ptr);
 				std::copy(ptr + 1, _start + _size, ptr);
 				_size--;
-				return vector_iterator(ptr);
+				return iterator(ptr);
 				/* TODO
 					- pos iterator 결정
 					- pos destroy
@@ -325,13 +326,14 @@ namespace ft
 			};
 			iterator erase(iterator first, iterator last) {
 				// Removes the elements in the range [first, last).
-				pointer ptr = _start + (first - _start);
-				for (pointer p = ptr; p != last; p++) {
-					_alloc.destroy(p);
+				iterator ptr = _start + (first - _start);
+				iterator start = this->begin();
+				for (iterator p = ptr; p != last; p++) {
+					_alloc.destroy(&(*p));
 				}
-				std::copy(ptr + 1, _start + _size, ptr);
+				std::copy(ptr + 1, start + _size, ptr);
 				_size -= last - first;
-				return vector_iterator(ptr);
+				return iterator(ptr);
 				/* TODO
 					- range, first, last iterator 결정
 					- first 부터 range destroy
@@ -362,7 +364,7 @@ namespace ft
 				// Resizes the container to contain count elements.
 				// If the current size is less than count, additional copies of value are appended.
 				if (count < _size) {
-					while (_size == _count)
+					while (_size == count)
 						this->pop_back();
 				}
 				else if (count > _size) {
@@ -386,7 +388,7 @@ namespace ft
 				// 멤버변수들만 바꿔주면 됨
 				std::swap(_start, other._start);
 				std::swap(_size, other._size);
-				std::swap(_capacity, other.capacity);
+				std::swap(_capacity, other._capacity);
 				std::swap(_alloc, other._alloc);
 			};
 

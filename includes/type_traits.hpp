@@ -17,7 +17,7 @@ namespace ft
 	struct enable_if { };
 
 	template<class T>
-	struct enable_if<true, T> { typedef T type };
+	struct enable_if<true, T> { typedef T type; };
 
 	//SECTION - is_integral
 	template <class T, T v>
@@ -49,7 +49,7 @@ namespace ft
 	template<> struct is_integral_base<unsigned int>: public true_type {};
 	template<> struct is_integral_base<long int>: public true_type {};
 
-	template<typename T> struct is_integral: is_integral_base<std::remove_cv<T>::type> {};
+	template<typename T> struct is_integral: is_integral_base<typename std::remove_cv<T>::type> {};
 }
 
 #endif
