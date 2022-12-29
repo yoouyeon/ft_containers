@@ -281,9 +281,9 @@ namespace ft
 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
 				pointer ptr = _start + (pos - old_start);
+				std::copy_backward(ptr, _start + _size, _start + new_size);
 				for (size_type i = 0; i < count; i++)
 					_alloc.construct(&ptr[i], value);
-				std::copy_backward(ptr, _start + _size, _start + new_size);
 				_size = new_size;
 				return iterator(ptr);
 				/* TODO
@@ -370,13 +370,13 @@ namespace ft
 				// Resizes the container to contain count elements.
 				// If the current size is less than count, additional copies of value are appended.
 				if (count < _size) {
-					while (_size == count)
+					while (_size != count)
 						this->pop_back();
 				}
 				else if (count > _size) {
 					reserve(count);
 					while (_size != count) {
-						_alloc.construct(&_start[_size - 1], value);
+						_alloc.construct(&_start[_size], value);
 						_size++;
 					}
 				}
@@ -417,15 +417,13 @@ namespace ft
 	//ANCHOR - Non-member functions
 	template<class T, class Alloc>
 	bool operator==(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-		if (ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
+		if (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
 			return true;
 		return false;
 	};
 	template<class T, class Alloc>
 	bool operator!=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
-		if (!ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
-			return true;
-		return false;
+		return !(lhs == rhs);
 	};
 	template<class T, class Alloc>
 	bool operator<(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
