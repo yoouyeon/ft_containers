@@ -56,13 +56,22 @@ namespace ft
 	// SECTION - tree iterator
 	// TODO - 파일 분리 가능성 있음
 	/**
-	 * @param T	
-	 * @param U 
+	 * @param T	ft::pair
+	 * @param U treeNode
 	 */
+	/*NOTE - reference
+		map line 793
+		_tree line 182
+	*/
 	template <class T, class U, class Category = std::bidirectional_iterator_tag, class Distance = std::ptrdiff_t, class Pointer = U*, class Reference = U&>
 	class treeIterator {
 		public :
-
+			// ANCHOR - Member types
+			typedef bidirectional_iterator_tag                           iterator_category;
+			typedef typename _NodeTypes::__map_value_type                value_type;
+			typedef typename _TreeIterator::difference_type              difference_type;
+			typedef value_type&                                          reference;
+			typedef typename _NodeTypes::__map_value_type_pointer        pointer;
 	};
 	// !SECTION
 
