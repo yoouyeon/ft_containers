@@ -4,12 +4,13 @@
 #include <algorithm>
 #include <memory>
 #include <iterator>
+#include "pair.hpp"
 
 namespace ft
 {
 	// SECTION - treeNode
 	/**
-	 * @param T	
+	 * @param T	: ft::pair
 	 */
 	template <typename T>
 	struct treeNode {
@@ -19,7 +20,7 @@ namespace ft
 		value_type _value;
 		treeNode *_parent;
 		treeNode *_left;
-		treeNote *_right;
+		treeNode *_right;
 
 		treeNode (void)
 			: _is_black(false),
@@ -49,6 +50,13 @@ namespace ft
 				_right = other._right;
 			}
 			return *this;
+		};
+		// ANCHOR - check color
+		bool is_black(void) {
+			return _is_black;
+		};
+		bool is_red(void) {
+			return !(_is_black);
 		};
 	};
 	// !SECTION
@@ -149,7 +157,7 @@ namespace ft
 			node_pointer	_nil; 	// unique leaf black node 
 			Comp			_comp;
 			Alloc			_alloc;
-			size_type			_size;
+			size_type		_size;
 
 			// ANCHOR - tree construct
 			rbTree (const Comp &comp, const Alloc &alloc)
@@ -207,15 +215,49 @@ namespace ft
 
 			};
 
+			/** 
+			 * NOTE
+			 * ref : _tree 2090 __emplace_unique_key_args (value)
+			 * ref : _tree 2190 __emplace_hint_unique_key_args (pos)
+			 */
 			ft::pair<iterator, bool> insert( const value_type& value ) {
-
+				/** 
+				 * NOTE
+				 * bool의 의미 - true : 없는 key를 추가함 false : 존재하던 key의 값을 업데이트함.
+				 * case 1) 빈 경우 : 루트로 설정해준다.
+				 * case 2) 그 외 : _insert_node(const value_type& value) 함수 호출
+				 * 	- 내부에서 _insert_node_at 함수 호출 예정...
+				 */
+				if (_begin == NULL) {
+					return ft::make_pair(this->_set_root(value), true);
+				}
+				else {
+					return this->_insert_node(value);
+				}
 			};
 			iterator insert( iterator pos, const value_type& value ) {
-
+				/**
+				 * NOTE
+				 * 여기서 말하는 pos는 insert할 정확한 위치가 아닌, 최대한 그 지점과 비슷한 곳에 삽입하라는 뜻이다.
+				 * 일단 그 지점을 시작으로 삽입할 수 있는 곳을 찾아서, 넣어준다.
+				 * 상황에 따라서 회전, 혹은 색상 변환을 해 주면 되겠다.
+				 * 
+				 * case 1) 빈 경우 : 루트로 설정해준다.
+				 * case 2) 그 외 : _insert_hint_node(node_pointer pos, const value_type& value) 함수 호출
+				 */
+				if (_begin == NULL) {
+					return this->_set_root(value);
+				}
+				else {
+					return this->_insert_hint_node(pos.base(), value);
+				}
 			};
 			template <class InputIt>
 			void insert(InputIt first, InputIt last) {
-
+				while (first != last) {
+					this->insert(*first);
+					first++;
+				}
 			}
 
 			void erase( iterator pos ) {
@@ -254,7 +296,7 @@ namespace ft
 			};
 
 			// ANCHOR - Lookup
-			node_poiner find( const key_type &key ) const {
+			node_pointer find( const key_type &key ) const {
 				
 			};
 			node_pointer lower_bound( const Key& key ) const {
@@ -266,6 +308,7 @@ namespace ft
 		// SECTION - private member functions
 		private :
 			rbTree (void) {};
+			// ANCHOR - set default node
 			node_pointer _construct_node (value_type &value) {
 				node_pointer ret;
 				_alloc.construct (&(ret->_value), value);
@@ -275,6 +318,99 @@ namespace ft
 				ret->_right = _nil;
 				return (ret);
 			};
+			iterator _set_root(const value_type& value) {
+				_begin = _construct_node(value);
+				_begin->_is_black = true;
+				_begin = _end;
+				return iterator(_begin);
+			};
+			// ANCHOR - insert node
+			ft::pair<iterator, bool> _insert_node(const value_type& value) {
+				node_pointer node_ptr = this->find(value.first);
+				bool result;
+				if (node_ptr != this->end()) {
+					result = false;
+					node_ptr->_value.second = value.second;
+				}
+				else {
+					result = true;
+					node_ptr = _construct_node(value);
+					// 삽입
+					_insert_node_at(_begin, node_ptr);
+					// 필요에 따라 회전
+					_rotate_if_needed(node_ptr);
+					// 필요에 따라 색상 변환
+					_recolor_if_needed(node_ptr);
+				}
+				return ft::make_pair(iterator(ret_ptr), result);
+			};
+			iterator _insert_hint_node(node_pointer pos, const value_type& value) {
+				node_pointer node_ptr = this->find(value.first);
+				if (node_ptr != this->end())
+					node_ptr->_value.second = value.second;
+				else {
+					if (pos->_parent != NULL)
+						pos = pos->_parent;
+					node_ptr = _construct_node(value);
+					// 삽입
+					_insert_node_at(pos, node_ptr);
+					// 필요에 따라 회전
+					_rotate_if_needed(node_ptr);
+					// 필요에 따라 색상 변환
+					_recolor_if_needed(node_ptr);
+				}
+				return iterator(node_ptr);
+			};
+			void _insert_node_at(node_pointer parent, node_pointer child) {
+				node_pointer new_node;
+				if (_comp(parent->_value, child->_value)) {
+					if (parent->_right == _nil) {
+						parent->_right = child;
+						child->_parent = parent->_right;
+					}
+					else
+						_insert_node_at(parent->_right, child);
+				}
+				else {
+					if (parent->_left == _nil) {
+						parent->_left = child;
+						child->_parent = parent->_right;
+					}
+					else
+						_insert_node_at(parent->_left, child);
+				}
+			}
+			// ANCHOR - rotate
+			void _rotate_if_needed(node_pointer node) {
+				// TODO - 회전 필요 여부 확인하는 함수 분리해야할지도
+				if (node->_parent == NULL || node->_parent->is_black() == true)
+					return;
+				node_pointer uncle_ptr = _get_sibling_ptr(node->_parent);
+				if (uncle_ptr != _nil && uncle_ptr->is_red() == true)
+					return;
+				// TODO - 회전 시작
+			}
+			// ANCHOR - recolor
+			void _recolor_if_needed(node_pointer node) {
+				// TODO - 색깔 변환 필요 여부 확인하는 함수 분리해야할지도
+				if (node->_parent == NULL || node->_parent->is_black() == true)
+					return;
+				node_pointer uncle_ptr = _get_sibling_ptr(node->_parent);
+				if (uncle_ptr == _nil || uncle_ptr->is_black() == true)
+					return;
+				// TODO - 색깔 변환 시작
+			}
+
+			// ANCHOR - util
+			node_pointer _get_sibling_ptr(node_pointer node) {
+				if (node->_parent == NULL)
+					return _nil;
+				else if (node->_parent->_left != node)
+					return node->_parent->_left;
+				else
+					return node->_parent->_right;
+			}
+
 		// !SECTION
 	};
 	// !SECTION
