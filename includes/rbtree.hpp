@@ -129,15 +129,19 @@ namespace ft
 
 	// SECTION - red-black tree
 	/**
-	 * @param T	
+	 * @param T	ft::pair<const Key, t>
+	 * @param Key map key
 	 */
-	template<typename T, typename Comp = std::less<T>, typename Alloc = std::allocator<T> >
+	template<typename T, typename Key, typename Comp = std::less<T>, typename Alloc = std::allocator<T> >
 	class rbTree {
 		public :
 			typedef treeNode<T> node;
 			typedef node* node_pointer;
 			typedef T value_type;
+			typedef Key key_type;
 			typedef treeIterator<value_type, node> iterator;
+			typedef __tree_iterator<const value_type, node_type> const_iterator;
+			typedef std::size_t		size_type;
 			
 			// TODO - 필요없으면 private으로 옮겨도 ㄱㅊ
 			node_pointer	_begin;	// root
@@ -145,7 +149,7 @@ namespace ft
 			node_pointer	_nil; 	// unique leaf black node 
 			Comp			_comp;
 			Alloc			_alloc;
-			size_t			_size;
+			size_type			_size;
 
 			// ANCHOR - tree construct
 			rbTree (const Comp &comp, const Alloc &alloc)
@@ -191,7 +195,18 @@ namespace ft
 					- nil 삭제
 				*/
 			};
-			// ANCHOR - insert (map에서 그대로 호출 예정)
+			// ANCHOR - iterator
+			node_pointer begin(void) const {
+				return _begin;
+			};
+			node_pointer end(void) const {
+				return _end;
+			};
+			// ANCHOR - Modifiers
+			void clear(void) {
+
+			};
+
 			ft::pair<iterator, bool> insert( const value_type& value ) {
 
 			};
@@ -202,17 +217,53 @@ namespace ft
 			void insert(InputIt first, InputIt last) {
 
 			}
-			// ANCHOR - iterator
-			iterator begin(void) {
-				// return _begin;
-			};
-			iterator end(void) {
-				// return _end;
-			};
-			// ANCHOR - clear
-			void clear(void) {
+
+			void erase( iterator pos ) {
 
 			};
+			size_type erase( const key_type& key ) {
+				iterator target = this->find(key);
+				if (target == this->end())
+					return 0;
+				else {
+					this->erase(target);
+					return 1;
+				}
+			};
+
+			void swap(rbTree &other) {
+				std::swap(_begin, other._begin);
+				std::swap(_end, other._end);
+				std::swap(_nil, other._nil);
+				std::swap(_comp, other._comp);
+				std::swap(_alloc, other._alloc);
+				std::swap(_size, other._size);
+			}
+			// ANCHOR - Capacity
+			bool empty() const {
+				if (_size == 0)
+					return true;
+				else
+					return false;
+			};
+			size_type size() const {
+				return _size;
+			};
+			size_type max_size() const {
+				return _alloc.max_size();
+			};
+
+			// ANCHOR - Lookup
+			node_poiner find( const key_type &key ) const {
+				
+			};
+			node_pointer lower_bound( const Key& key ) const {
+
+			}
+			node_pointer upper_bound( const Key& key ) const {
+
+			}
+		// SECTION - private member functions
 		private :
 			rbTree (void) {};
 			node_pointer _construct_node (value_type &value) {
@@ -223,7 +274,8 @@ namespace ft
 				ret->_left = _nil;
 				ret->_right = _nil;
 				return (ret);
-			}
+			};
+		// !SECTION
 	};
 	// !SECTION
 }
