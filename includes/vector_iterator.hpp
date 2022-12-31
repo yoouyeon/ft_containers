@@ -18,6 +18,10 @@ namespace ft
 			vector_iterator(void) {};
 			vector_iterator(pointer ptr) : _ptr(ptr) {};
 			vector_iterator(const vector_iterator &other) : _ptr(other.base()) {};
+			// TODO -  필요성 여부 확인 필요함.
+			operator vector_iterator<const T>(void) const { 
+				return vector_iterator<const T>(this->_ptr);
+			};
 			vector_iterator &operator=(const vector_iterator<const T> &other) {
 				if (this != &other)
 					_ptr = other.base();
@@ -27,10 +31,6 @@ namespace ft
 			// getter
 			pointer base(void) const {
 				return _ptr; 
-			};
-
-			operator vector_iterator<const T>(void) const { 
-				return vector_iterator<const T>(this->_ptr);
 			};
 		protected:
 			pointer _ptr;
