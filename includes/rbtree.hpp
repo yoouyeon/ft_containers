@@ -63,15 +63,67 @@ namespace ft
 		map line 793
 		_tree line 182
 	*/
-	template <class T, class U, class Category = std::bidirectional_iterator_tag, class Distance = std::ptrdiff_t, class Pointer = U*, class Reference = U&>
+	template <class T, class U>
 	class treeIterator {
 		public :
 			// ANCHOR - Member types
-			typedef bidirectional_iterator_tag                           iterator_category;
-			typedef typename _NodeTypes::__map_value_type                value_type;
-			typedef typename _TreeIterator::difference_type              difference_type;
-			typedef value_type&                                          reference;
-			typedef typename _NodeTypes::__map_value_type_pointer        pointer;
+			typedef std::bidirectional_iterator_tag	iterator_category;
+			typedef T								value_type;
+			typedef std::ptrdiff_t					difference_type;
+			typedef T&								reference;
+			typedef T*								pointer;
+			typedef U								node_type;
+			typedef U&								node_reference;
+			typedef U*								node_pointer;
+		private :
+			// ANCHOR - Member variables
+			node_pointer _ptr;
+		public :
+			// SECTION - Member funcions
+			// ANCHOR - construct/copy/destruct
+			treeIterator(void) {};
+			treeIterator(pointer ptr) : _ptr(ptr) {};
+			treeIterator(const treeIterator &other) : _ptr(other.base()) {};
+			treeIterator &operator=(const treeIterator &other) {
+				if (this != &other) {
+					_ptr = other.base();
+				}
+				return *this;
+			}
+			~treeIterator(void) {};
+			// getter
+			node_pointer base(void) const {
+				return _ptr;
+			}
+			// ANCHOR - equality/inequality operators
+			bool operator==(const treeIterator &other) {
+				return _ptr == other.base()
+			}
+			bool operator!=(const treeIterator &other) {
+				return _ptr != other.base();
+			}
+			// ANCHOR - Element access
+			pointer operator*(void) const {
+				return &(_ptr->_value);
+			}
+			reference operator->(void) const {
+				return _ptr->_value;
+			}
+			// ANCHOR - increase, decrease
+			treeIterator &operator++(void) {
+				// 전위
+			}
+			treeIterator &operator--(void) {
+
+			}
+			treeIterator operator++(int) {
+				// 후위
+			}
+			treeIterator operator--(int) {
+				
+			}
+			// !SECTION
+
 	};
 	// !SECTION
 
