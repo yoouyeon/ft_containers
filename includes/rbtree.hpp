@@ -152,7 +152,7 @@ namespace ft
 			typedef std::size_t		size_type;
 			
 			// TODO - 필요없으면 private으로 옮겨도 ㄱㅊ
-			node_pointer	_begin;	// root
+			node_pointer	_begin;	// first (smallest)
 			node_pointer	_end;	// last (?)
 			node_pointer	_nil; 	// unique leaf black node 
 			Comp			_comp;
@@ -170,8 +170,8 @@ namespace ft
 				_nil->_parent = NULL;
 				_nil->_left = NULL;
 				_nil->_right = NULL;
-				_begin = NULL;
-				_end = NULL;
+				_begin = _construct_node(value_type());
+				_end = _begin;
 			};
 			rbTree (const rbTree &other)
 			: _comp(other._comp),
@@ -183,8 +183,8 @@ namespace ft
 				_nil->_parent = NULL;
 				_nil->_left = NULL;
 				_nil->_right = NULL;
-				_begin = NULL;
-				_end = NULL;
+				_begin = _construct_node(value_type());
+				_end = _begin;
 				this->insert(other.begin(), other.end());
 			};
 			rbTree& operator=( const rbTree& other ) {
@@ -228,7 +228,9 @@ namespace ft
 				 * case 2) 그 외 : _insert_node(const value_type& value) 함수 호출
 				 * 	- 내부에서 _insert_node_at 함수 호출 예정...
 				 */
-				if (_begin == NULL) {
+				if (_get_root() == _nil) {
+					node_pointer new_root = _construct_node(value);
+					_set_root(new_root);
 					return ft::make_pair(this->_set_root(value), true);
 				}
 				else {
@@ -245,7 +247,7 @@ namespace ft
 				 * case 1) 빈 경우 : 루트로 설정해준다.
 				 * case 2) 그 외 : _insert_hint_node(node_pointer pos, const value_type& value) 함수 호출
 				 */
-				if (_begin == NULL) {
+				if (_get_root() == _nil) {
 					return this->_set_root(value);
 				}
 				else {
@@ -318,12 +320,6 @@ namespace ft
 				ret->_right = _nil;
 				return (ret);
 			};
-			iterator _set_root(const value_type& value) {
-				_begin = _construct_node(value);
-				_begin->_is_black = true;
-				_begin = _end;
-				return iterator(_begin);
-			};
 			// ANCHOR - insert node
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
 				node_pointer node_ptr = this->find(value.first);
@@ -336,11 +332,9 @@ namespace ft
 					result = true;
 					node_ptr = _construct_node(value);
 					// 삽입
-					_insert_node_at(_begin, node_ptr);
-					// 필요에 따라 회전
-					_rotate_if_needed(node_ptr);
-					// 필요에 따라 색상 변환
-					_recolor_if_needed(node_ptr);
+					_insert_node_at(_get_root(), node_ptr);
+					_insert_fix_up(node_ptr);
+					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
 				}
 				return ft::make_pair(iterator(ret_ptr), result);
 			};
@@ -349,15 +343,11 @@ namespace ft
 				if (node_ptr != this->end())
 					node_ptr->_value.second = value.second;
 				else {
-					if (pos->_parent != NULL)
-						pos = pos->_parent;
+					// TODO - pos를 이용해서 실제로 넣을 수 있는 위치를 효율적으로 찾는 작업이 필요함. (__find_equal(const_iterator __hint 을 참고하면 좋을 듯?)
 					node_ptr = _construct_node(value);
-					// 삽입
 					_insert_node_at(pos, node_ptr);
-					// 필요에 따라 회전
-					_rotate_if_needed(node_ptr);
-					// 필요에 따라 색상 변환
-					_recolor_if_needed(node_ptr);
+					_insert_fix_up(node_ptr);
+					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
 				}
 				return iterator(node_ptr);
 			};
@@ -380,37 +370,114 @@ namespace ft
 						_insert_node_at(parent->_left, child);
 				}
 			}
+			void _insert_fix_up(node_pointer node) {
+				node_pointer current = node;
+				while (current->_parent != NULL && current->_parent->is_red() == true) {
+					if (current->_parent == current->_parent->_parent->_left) {
+						current = _insert_fix_up_left(current);
+					}
+					else {
+						current = _insert_fix_up_right(current);
+					}
+				}
+				_get_root()->_is_black = true;
+			}
+
+			node_pointer _insert_fix_up_left(node_pointer current) {
+				node_pointer uncle;
+				uncle = current->_parent->_parent->_right;
+				if (uncle->is_red() == true) {
+					_recolor(current->_parent, uncle, current->_parent->_parent);
+					current = current->_parent->_parent;
+				}
+				else {
+					if (current == current->_parent->_right) {
+						current = current->_parent;
+						_rotate_right(current);
+					}
+					current->_parent->_is_black = true;
+					current->_parent->_parent->_is_black = false;
+					_rotate_left(current->_parent->_parent);
+				}
+				return current;
+			}
+
+			node_pointer _insert_fix_up_right(node_pointer current) {
+				node_pointer uncle;
+				uncle = current->_parent->_parent->_left;
+				if (uncle->is_red() == true) {
+					_recolor(current->_parent, uncle, current->_parent->_parent);
+					current = current->_parent->_parent;
+				}
+				else {
+					if (current == current->_parent->_left) {
+						current = current->_parent;
+						_rotate_right(current);
+					}
+					current->_parent->_is_black = true;
+					current->_parent->_parent->_is_black = false;
+					_rotate_left(current->_parent->_parent);
+				}
+			}
+
 			// ANCHOR - rotate
-			void _rotate_if_needed(node_pointer node) {
-				// TODO - 회전 필요 여부 확인하는 함수 분리해야할지도
-				if (node->_parent == NULL || node->_parent->is_black() == true)
-					return;
-				node_pointer uncle_ptr = _get_sibling_ptr(node->_parent);
-				if (uncle_ptr != _nil && uncle_ptr->is_red() == true)
-					return;
-				// TODO - 회전 시작
+			void _rotate_left(node_pointer parent) {
+				node_pointer right_child = parent->_right;
+				parent->_right = right_child->_left; // 오른쪽 자식노드의 왼쪽 자식노드를 부모의 오른쪽 자식으로
+				if (parent->_right != _nil) // 만약 자식이 존재한다면 자식의 부모 정보도 업데이트 해 준다.
+					parent->_right->_parent = parent;
+				right_child->_parent = parent->_parent; // 자식의 부모도 부모의 부모로 (...) 업데이트 해 준다.
+				if (right_child->_parent == NULL) {	// 만약 부모가 루트였을 경우에는 자식을 루트로 업데이트 해 준다.
+					_set_root(right_child);
+				}
+				else {
+					if (parent == parent->_parent->_right)
+						parent->_parent->_right = right_child;
+					else
+						parent->_parent->_left = right_child;
+				}
+				right_child->_left = parent;
+				parent->_parent = right_child;
+			}
+
+			void _rotate_right(node_pointer parent) {
+				node_pointer left_child = parent->_left;
+
+				parent->_left = left_child->_right;
+				
+				if (parent->_left != _nil)
+					parent->_left->_parent = parent;
+
+				left_child->_parent = parent->_parent;
+
+				if (left_child->_parent == NULL)
+					_set_root(left_child);
+				else
+				{
+					if (parent == parent->_parent->_left)
+						parent->_parent->_left = left_child;
+					else
+						parent->_parent->_right = left_child;
+				}
+				left_child->_right = parent;
+				parent->_parent = left_child;
 			}
 			// ANCHOR - recolor
-			void _recolor_if_needed(node_pointer node) {
-				// TODO - 색깔 변환 필요 여부 확인하는 함수 분리해야할지도
-				if (node->_parent == NULL || node->_parent->is_black() == true)
-					return;
-				node_pointer uncle_ptr = _get_sibling_ptr(node->_parent);
-				if (uncle_ptr == _nil || uncle_ptr->is_black() == true)
-					return;
-				// TODO - 색깔 변환 시작
+			void _recolor(node_pointer parent, node_pointer uncle, node_pointer grand_parent) {
+				parent->_is_black = true;
+				uncle->_is_black = true;
+				grand_parent->_is_black = false;
 			}
 
 			// ANCHOR - util
-			node_pointer _get_sibling_ptr(node_pointer node) {
-				if (node->_parent == NULL)
-					return _nil;
-				else if (node->_parent->_left != node)
-					return node->_parent->_left;
-				else
-					return node->_parent->_right;
+			void _set_root(node_pointer new_root) {
+				new_root->_is_black = true;
+				_end->_left = new_root;
+				new_root->_parent = _end;
+			};
+			node_pointer _get_root(void) {
+				return _end->_left;
 			}
-
 		// !SECTION
 	};
 	// !SECTION
