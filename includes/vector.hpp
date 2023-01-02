@@ -420,41 +420,41 @@ namespace ft
 		if (lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()))
 			return true;
 		return false;
-	};
+	}
 	template<class T, class Alloc>
 	bool operator!=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 		return !(lhs == rhs);
-	};
+	}
 	template<class T, class Alloc>
 	bool operator<(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 		if (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()))
 			return true;
 		return false;
-	};
+	}
 	template<class T, class Alloc>
 	bool operator<=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 		if (lhs < rhs || lhs == rhs)
 			return true;
 		return false;
-	};
+	}
 	template<class T, class Alloc>
 	bool operator>(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 		if (!(lhs <= rhs))
 			return true;
 		return false;
-	};
+	}
 	template<class T, class Alloc>
 	bool operator>=(const ft::vector<T,Alloc>& lhs, const ft::vector<T,Alloc>& rhs) {
 		if (!(lhs < rhs))
 			return true;
 		return false;
-	};
+	}
 	template<class T, class Alloc>
 	void swap(ft::vector<T,Alloc>& lhs, ft::vector<T,Alloc>& rhs) {
 		// Specializes the std::swap algorithm for ft::vector.
 		// Swaps the contents of lhs and rhs. Calls lhs.swap(rhs).
 		lhs.swap(rhs);
-	};
+	}
 }
 
 #endif
