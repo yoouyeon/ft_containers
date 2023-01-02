@@ -363,6 +363,8 @@ namespace ft
 			void pop_back() {
 				// Removes the last element of the container.
 				// Calling pop_back on an empty container results in undefined behavior.
+				if (this->empty())
+					return;
 				_alloc.destroy(&_start[_size - 1]);
 				_size--;
 			};
