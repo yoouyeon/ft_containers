@@ -119,16 +119,18 @@ namespace ft
 			}
 			// ANCHOR - increase, decrease
 			treeIterator &operator++(void) {
+				// TODO
 				// 전위
 			}
 			treeIterator &operator--(void) {
-
+				// TODO
 			}
 			treeIterator operator++(int) {
+				// TODO
 				// 후위
 			}
 			treeIterator operator--(int) {
-				
+				// TODO
 			}
 			// !SECTION
 
@@ -212,7 +214,7 @@ namespace ft
 			};
 			// ANCHOR - Modifiers
 			void clear(void) {
-
+				// TODO
 			};
 
 			/** 
@@ -263,7 +265,12 @@ namespace ft
 			}
 
 			void erase( iterator pos ) {
-
+				// TODO
+				// step 0) 삭제할 노드 백업
+				node_pointer target = pos.base()
+				// step 1) 대체자를 찾는다.
+				// step 2) 이식
+				// step 3) 
 			};
 			size_type erase( const key_type& key ) {
 				iterator target = this->find(key);
@@ -294,18 +301,31 @@ namespace ft
 				return _size;
 			};
 			size_type max_size() const {
-				return _alloc.max_size();
+				// TODO - 확인 필요함.
+				return std::min<size_type>(PTRDIFF_MAX, _alloc.max_size());
+				// return _alloc.max_size();
 			};
 
 			// ANCHOR - Lookup
 			node_pointer find( const key_type &key ) const {
-				
+				if (this->empty())
+					return _end;
+				node_pointer ptr = _get_root();
+				while(ptr != _nil) {
+					if (_comp(ptr->_value, key))
+						ptr = ptr->_right;
+					else if (_comp(key, ptr->_value))
+						ptr = ptr->_left;
+					else
+						return ptr;
+				}
+				return _end;
 			};
 			node_pointer lower_bound( const Key& key ) const {
-
+				// TODO
 			}
 			node_pointer upper_bound( const Key& key ) const {
-
+				// TODO
 			}
 		// SECTION - private member functions
 		private :
@@ -313,6 +333,7 @@ namespace ft
 			// ANCHOR - set default node
 			node_pointer _construct_node (value_type &value) {
 				node_pointer ret;
+				// TODO - 왜 과거의 나는 이걸 동적할당 해줬을까?
 				_alloc.construct (&(ret->_value), value);
 				ret->_is_black = false;
 				ret->_parent = NULL;
