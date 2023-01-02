@@ -1,6 +1,6 @@
 NAME	=	container
 CXX	=	c++
-SRCS	=	test/map_test.cpp
+SRCS	=	test/vector_test.cpp
 OBJS	=	$(SRCS:.cpp=.o)
 
 ifdef CPP11

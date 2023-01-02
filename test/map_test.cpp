@@ -1,8 +1,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <string>
 
-int main(void) {
+void test_end(void) {
 	// SECTION - end, rend에 관하여
 	std::map<int, bool> std_map;
 	// 값 하나를 넣고 end, rend를 저장
@@ -38,12 +39,41 @@ int main(void) {
 	 * end1 과 end2는 동일합니다 : false
 	 * rend1 과 rend2는 동일합니다 : false
 	*/
-	/**
-	 * NOTE
-	 * vector의 end는 
-	 * 
-	 */
 	// !SECTION
+}
+
+void test_erase(){
+	std::map<int, std::string> test_map;
+	test_map.insert(std::make_pair(3, "삭제하려는 것"));
+	test_map.insert(std::make_pair(5, "남아야 하는 것"));
+	auto target = test_map.begin();
+	std::cout << "==== map status (1) ====\n";
+	for(auto iter = test_map.begin(); iter != test_map.end(); iter++) {
+		std::cout << (*iter).first << " - " << (*iter).second << "\n";
+	}
+	std::cout << "========== end =========\n";
+	std::cout << "! target : " << (*target).first << " - " << (*target).second << "\n";
+	// begin을 바꿔줌.
+	test_map.insert(std::make_pair(2, "남아야 하는 것"));
+	test_map.insert(std::make_pair(1, "남아야 하는 것"));
+	test_map.insert(std::make_pair(4, "남아야 하는 것"));
+	std::cout << "==== map status (2) ====\n";
+	for(auto iter = test_map.begin(); iter != test_map.end(); iter++) {
+		std::cout << (*iter).first << " - " << (*iter).second << "\n";
+	}
+	std::cout << "========== end =========\n";
+	// 삭제함
+	test_map.erase(target);
+	std::cout << "==== map status (3) ====\n";
+	for(auto iter = test_map.begin(); iter != test_map.end(); iter++) {
+		std::cout << (*iter).first << " - " << (*iter).second << "\n";
+	}
+	std::cout << "========== end =========\n";
+}
+
+int main(void) {
+	test_end();
+	test_erase();
 
 	return (0);
 }

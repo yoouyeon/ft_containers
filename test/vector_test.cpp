@@ -11,7 +11,7 @@ void print_vector(ft::vector<int> &v) {
     std::cout << "---------\n";
 }
 
-int main(void) {
+void test_test() {
     try
     {
         std::list<int> lst;
@@ -40,7 +40,18 @@ int main(void) {
     {
         std::cerr << e.what() << '\n'; 
     }
-    
+}
+
+void pop_back_empty() {
+    std::cout << "------- pop_back_empty -------\n";
+    std::vector<int> ft;
+    ft.pop_back();
+    std::cout << ft.size() << "\n";
+}
+
+int main(void) {
+    // test_test();
+    pop_back_empty();
 
     return 0;
 }
