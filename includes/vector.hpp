@@ -70,7 +70,7 @@ namespace ft
 				*/
 			};
 			template<class InputIt>
-			explicit vector(InputIt first, InputIt last, const Allocator& alloc = Allocator(), typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) \
+			vector(InputIt first, InputIt last, const Allocator& alloc = Allocator(), typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0) \
 				: _alloc(Allocator(alloc)) {
 				// (5) Constructs the container with the contents of the range [first, last).
 				_size = std::distance(first, last);
@@ -87,7 +87,7 @@ namespace ft
 					- _start 결정 ✔️
 				*/
 			};
-			explicit vector(const vector& other) \
+			vector(const vector& other) \
 				: _size(other.size()), \
 				_capacity(other.capacity()), \
 				_alloc(other.get_allocator()) {
@@ -239,7 +239,8 @@ namespace ft
 			};
 			size_type max_size() const {
 				// Returns the maximum number of elements the container is able to hold due to system or library implementation limitations
-				return _alloc.max_size();
+				// TODO - 여전히 잘 모르겠따
+				return std::min<size_type>(PTRDIFF_MAX, _alloc.max_size());
 			};
 			void reserve(size_type new_cap) {
 				// Increase the capacity of the vector to a value that's greater or equal to new_cap.
