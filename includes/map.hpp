@@ -201,6 +201,7 @@ namespace ft
 			};
 
 			// ANCHOR - Observers
+			// TODO - 잘 모르겠습니다.
 			key_compare key_comp() const {
 				return _comp;
 			};
@@ -217,40 +218,40 @@ namespace ft
 			return true;
 		else
 			return false;
-	};
+	}
 	template< class Key, class T, class Compare, class Alloc >
 	bool operator!=( const ft::map<Key, T, Compare, Alloc>& lhs, const ft::map<Key, T, Compare, Alloc>& rhs ) {
 		return !(lhs == rhs);
-	};
+	}
 	template< class Key, class T, class Compare, class Alloc >
 	bool operator<( const ft::map<Key, T, Compare, Alloc>& lhs, const ft::map<Key, T, Compare, Alloc>& rhs ) {
 		if (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()))
 			return true;
 		return false;
-	};
+	}
 	template< class Key, class T, class Compare, class Alloc >
 	bool operator<=( const ft::map<Key, T, Compare, Alloc>& lhs, const ft::map<Key, T, Compare, Alloc>& rhs ) {
 		if (lhs < rhs || lhs == rhs)
 			return true;
 		return false;
-	};
+	}
 	template< class Key, class T, class Compare, class Alloc >
 	bool operator>( const ft::map<Key, T, Compare, Alloc>& lhs, const ft::map<Key, T, Compare, Alloc>& rhs ) {
 		if (!(lhs <= rhs))
 			return true;
 		return false;
-	};
+	}
 	template< class Key, class T, class Compare, class Alloc >
 	bool operator>=( const ft::map<Key, T, Compare, Alloc>& lhs, const ft::map<Key, T, Compare, Alloc>& rhs ) {
 		if (!(lhs < rhs))
 			return true;
 		return false;
-	};
+	}
 	// ANCHOR - swap
 	template< class Key, class T, class Compare, class Alloc >
 	void swap( std::map<Key,T,Compare,Alloc>& lhs, std::map<Key,T,Compare,Alloc>& rhs ) {
 		lhs.swap(rhs);
-	};
+	}
 	// !SECTION
 }
 
