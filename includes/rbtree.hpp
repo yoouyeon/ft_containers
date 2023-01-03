@@ -86,15 +86,17 @@ namespace ft
 		private :
 			// ANCHOR - Member variables
 			node_pointer _ptr;
+			node_pointer _nil;
 		public :
 			// SECTION - Member funcions
 			// ANCHOR - construct/copy/destruct
-			treeIterator(void) {};
-			treeIterator(pointer ptr) : _ptr(ptr) {};
-			treeIterator(const treeIterator &other) : _ptr(other.base()) {};
+			treeIterator(void) : _ptr(NULL) _nil(NULL) {};
+			treeIterator(pointer ptr, pointer nil) : _ptr(ptr) _nil(nil) {};
+			treeIterator(const treeIterator &other) : _ptr(other._ptr) _nil(other._nil) {};
 			treeIterator &operator=(const treeIterator &other) {
 				if (this != &other) {
-					_ptr = other.base();
+					_ptr = other._ptr;
+					_nil = other._nil;
 				}
 				return *this;
 			}
@@ -119,21 +121,61 @@ namespace ft
 			}
 			// ANCHOR - increase, decrease
 			treeIterator &operator++(void) {
-				// TODO
 				// 전위
+				if (this->_ptr->_right != _nil)
+					this->_ptr = this->_get_minimum_node(this->_ptr->_right);
+				else
+				{
+					node_pointer child = this->_ptr;
+					this->_ptr = this->_node->_parent;
+					while (this->_ptr != NULL && child == this->_ptr->_right) {
+						child = this->_ptr;
+						this->_ptr = this->_ptr->_parent;
+					}
+				}
+				return (*this);
 			}
 			treeIterator &operator--(void) {
-				// TODO
+				if (this->_ptr->_left != _nil)
+					this->_ptr = this->_get_maximum_node(this->_ptr->_left);
+				else
+				{
+					node_pointer child = this->_ptr;
+					this->_ptr = this->_node->_parent;
+					while (this->_ptr != NULL && child == this->_ptr->_left) {
+						child = this->_ptr;
+						this->_ptr = this->_ptr->_parent;
+					}
+				}
+				return (*this);
 			}
 			treeIterator operator++(int) {
-				// TODO
 				// 후위
+				treeIterator ret(*this);
+				++(*this);
+				return ret;
 			}
 			treeIterator operator--(int) {
-				// TODO
+				treeIterator ret(*this);
+				--(*this);
+				return ret;
 			}
 			// !SECTION
-
+		private:
+			// ANCHOR - util functions
+			node_pointer _get_minimum_node(node_pointer sub_root) {
+				node_pointer ret = sub_root;
+				while (ret->_left != _nil)
+					ret = ret->_left;
+				return ret;
+			}
+			node_pointer _get_maximum_node(node_pointer sub_root) {
+				node_pointer ret = sub_root;
+				while (ret->_right != _nil) {
+					ret = ret->_right;
+				}
+				return ret;
+			}
 	};
 	// !SECTION
 
@@ -273,7 +315,7 @@ namespace ft
 				 */
 				if (_size == 0)
 					return;
-				iterator temp(pos);	// backup
+				iterator temp(pos, _nil);	// backup
 				temp++;
 				if (pos == this->begin()) {
 					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
@@ -287,7 +329,7 @@ namespace ft
 				_size--;
 			};
 			size_type erase( const key_type& key ) {
-				iterator target = this->find(key);
+				iterator target = iterator(this->find(key), _nil);
 				if (target == this->end())
 					return 0;
 				else {
@@ -377,7 +419,7 @@ namespace ft
 					_insert_fix_up(node_ptr);
 					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
 				}
-				return ft::make_pair(iterator(ret_ptr), result);
+				return ft::make_pair(iterator(ret_ptr, _nil), result);
 			};
 			iterator _insert_hint_node(node_pointer pos, const value_type& value) {
 				node_pointer node_ptr = this->find(value.first);
@@ -390,7 +432,7 @@ namespace ft
 					_insert_fix_up(node_ptr);
 					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
 				}
-				return iterator(node_ptr);
+				return iterator(node_ptr, _nil);
 			};
 			void _insert_node_at(node_pointer parent, node_pointer child) {
 				node_pointer new_node;
