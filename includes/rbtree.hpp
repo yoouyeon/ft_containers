@@ -306,8 +306,7 @@ namespace ft
 				}
 			}
 
-			void erase( iterator pos ) {
-				// TODO
+			iterator erase( iterator pos ) {
 				/**
 				 * TODO - 만약에 이상한 이터레이터가 들어왔을 때 (근데 이게 안에서 보기엔 유효함)
 				 * std::map에서는 세그폴트가 남.
@@ -315,11 +314,11 @@ namespace ft
 				 */
 				if (_size == 0)
 					return;
-				iterator temp(pos, _nil);	// backup
+				iterator temp(pos, _nil);	// backup (for iterator )
 				temp++;
 				if (pos == this->begin()) {
 					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
-					_begin = temp.base();
+					_begin = pos.base();
 				}
 				// pos에 해당하는 노드를 트리에서 떼어내기
 				_delete_node(pos.base());
@@ -327,6 +326,7 @@ namespace ft
 				_destruct_node(pos.base());
 				// 마지막에 사이즈 감소시키기
 				_size--;
+				return temp;
 			};
 			size_type erase( const key_type& key ) {
 				iterator target = iterator(this->find(key), _nil);
@@ -417,7 +417,7 @@ namespace ft
 					// 삽입
 					_insert_node_at(_get_root(), node_ptr);
 					_insert_fix_up(node_ptr);
-					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
+					_insert_update(node_ptr);
 				}
 				return ft::make_pair(iterator(ret_ptr, _nil), result);
 			};
@@ -428,9 +428,10 @@ namespace ft
 				else {
 					// TODO - pos를 이용해서 실제로 넣을 수 있는 위치를 효율적으로 찾는 작업이 필요함. (__find_equal(const_iterator __hint 을 참고하면 좋을 듯?)
 					node_ptr = _construct_node(value);
-					_insert_node_at(pos, node_ptr);
+					// _insert_node_at(pos, node_ptr);
+					_insert_node_at(_get_root(), node_ptr);
 					_insert_fix_up(node_ptr);
-					_insert_update(node_ptr); // TODO - _size 증가, _begin 업데이트 필요하다면 업데이트
+					_insert_update(node_ptr);
 				}
 				return iterator(node_ptr, _nil);
 			};
@@ -501,6 +502,12 @@ namespace ft
 					current->_parent->_parent->_is_black = false;
 					_rotate_left(current->_parent->_parent);
 				}
+			}
+
+			void _insert_update(node_pointer new_node) {
+				if(_size == 0 || _comp(new_node->_value, _begin->_value))
+					_begin = new_node;
+				_size++;
 			}
 
 			// ANCHOR - rotate

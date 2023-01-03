@@ -159,7 +159,11 @@ namespace ft
 				// Number of elements removed (0 or 1).
 				return _tree.erase(key);
 			};
-
+			void erase (iterator first, iterator last) {
+				iterator next_delete = first;
+				while (next_delete != last)
+					next_delete = _tree.erase(next_delete);
+			};
 			void swap( map& other ) {
 				_tree.swap(other._tree);
 			};
