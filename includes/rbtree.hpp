@@ -266,11 +266,25 @@ namespace ft
 
 			void erase( iterator pos ) {
 				// TODO
-				// step 0) 삭제할 노드 백업
-				node_pointer target = pos.base()
-				// step 1) 대체자를 찾는다.
-				// step 2) 이식
-				// step 3) 
+				/**
+				 * TODO - 만약에 이상한 이터레이터가 들어왔을 때 (근데 이게 안에서 보기엔 유효함)
+				 * std::map에서는 세그폴트가 남.
+				 * ft::map에서도 세크폴트를 유발하는 것이 맞을지 모르겠다.
+				 */
+				if (_size == 0)
+					return;
+				iterator temp(pos);	// backup
+				temp++;
+				if (pos == this->begin()) {
+					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
+					_begin = temp.base();
+				}
+				// pos에 해당하는 노드를 트리에서 떼어내기
+				_delete_node(pos.base());
+				// 노드 메모리 상에서 제거하기
+				_destruct_node(pos.base());
+				// 마지막에 사이즈 감소시키기
+				_size--;
 			};
 			size_type erase( const key_type& key ) {
 				iterator target = this->find(key);
@@ -330,9 +344,9 @@ namespace ft
 		// SECTION - private member functions
 		private :
 			rbTree (void) {};
-			// ANCHOR - set default node
+			// ANCHOR - construct, destruct node
 			node_pointer _construct_node (value_type &value) {
-				node_pointer ret;
+				node_pointer ret = _alloc.allocate(1);
 				// TODO - 왜 과거의 나는 이걸 동적할당 해줬을까?
 				_alloc.construct (&(ret->_value), value);
 				ret->_is_black = false;
@@ -341,6 +355,12 @@ namespace ft
 				ret->_right = _nil;
 				return (ret);
 			};
+
+			void _destruct_node(node_pointer ptr) {
+				// TODO - 생성시에 동적할당 해줬기 때문에 지워줌. 만약에 불필요하다면 없애버리자.
+				_alloc.destroy(&(ret->_value));
+				_alloc.deallocate(ptr, 1);
+			}
 			// ANCHOR - insert node
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
 				node_pointer node_ptr = this->find(value.first);
@@ -488,6 +508,122 @@ namespace ft
 				parent->_is_black = true;
 				uncle->_is_black = true;
 				grand_parent->_is_black = false;
+			}
+
+			// ANCHOR - erase/delete
+			void _delete_node(node_pointer target) {
+				bool _target_original_color_is_black = target->_is_black;
+				node_pointer replace_node = _get_replace_node(target);
+				_transplant(target, replace_node);
+				if (_target_original_color_is_black == true)
+					_delete_fix_up(replace_node);
+			}
+
+			void _delete_fix_up(node_pointer node) {
+				while (node != _get_root() && node->_is_black() == true) {
+					// 대체된 노드의 새로운 자리가 왼쪽 자식 자리인 경우
+					if (node == node->_parent->_left) {
+						node = _delete_fix_up_left(node);
+					}
+					else {
+						node = _delete_fix_up_right(node);
+					}
+				}
+				node->_is_black = true;
+			}
+
+			node_pointer _delete_fix_up_left(node_pointer node) {
+				node_pointer sibling = node->_parent->_right;
+				if (sibling->is_red() == true) {
+					sibling->_is_black = true;
+					node->_parent->_is_black = false;
+					_rotate_left(node->_parent);
+					sibling = node->_parent->_right;
+				}
+				if (sibling->_left->is_black() == true && sibling->_right->is_black() == true) {
+					sibling->_is_black = false;
+					node = node->_parent;
+				}
+				else {
+					if (sibling->_right->is_black() == true) {
+						sibling->_left->_is_black = true;
+						sibling->_is_black = false;
+						_rotate_right(sibling);
+						sibling = node->_parent->_right;
+					}
+					sibling->_is_black = node->_parent->_is_black;
+					node->_parent->_is_black = true;
+					sibling->_right->is_black = true;
+					_rotate_left(node->_parent);
+					node = _get_root();
+				}
+				return node;
+			}
+
+			node_pointer _delete_fix_up_right(node_pointer node) {
+				node_pointer sibling = node->_parent->_left;
+				if (sibling->is_red() == true) {
+					sibling->_is_black = true;
+					node->_parent->_is_black = false;
+					_rotate_left(node->_parent);
+					sibling = node->_parent->_left;
+				}
+				if (sibling->_right->is_black() == true && sibling->_left->is_black() == true) {
+					sibling->_is_black = false;
+					node = node->_parent;
+				}
+				else {
+					if (sibling->_left->is_black() == true) {
+						sibling->_right->_is_black = true;
+						sibling->_is_black = false;
+						_rotate_left(sibling);
+						sibling = node->_parent->_left;
+					}
+					sibling->_is_black = node->_parent->_is_black;
+					node->_parent->_is_black = true;
+					sibling->_left->is_black = true;
+					_rotate_right(node->_parent);
+					node = _get_root();
+				}
+				return node;
+			}
+
+			node_pointer _get_replace_node(node_pointer target) {
+				node_pointer replace_node;
+				if (target->_right != _nil)
+					replace_node = _get_minimum_node(target);
+				else if (target->_left != _nil)
+					replace_node = _get_maximum_node(target);
+				else
+					replace_node = _nil;
+				return replace_node;
+			}
+
+			node_pointer _get_minimum_node(node_pointer root) {
+				node_pointer ret = root;
+				while (ret->_left != _nil)
+					ret = ret->_left;
+				return ret;
+			}
+
+			node_pointer _get_maximum_node(node_pointer root) {
+				node_pointer ret = root;
+				while (ret->_right != _nil)
+					ret = ret->_right;
+				return ret;
+			}
+
+			void _transplant(node_pointer target, node_pointer replace_node) {
+				if (target == _get_root())
+					_set_root(replace_node);
+				else {
+					if (target == target->_parent->_left)
+						target->_parent->_left = replace_node;
+					else
+						target->_parent->_right = replace_node;
+					if (replace_node != _nil)
+						replace_node->_parent = target->_parent;
+				}
 			}
 
 			// ANCHOR - util
