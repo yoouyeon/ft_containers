@@ -222,7 +222,7 @@ namespace ft
 			rbTree (const rbTree &other)
 			: _comp(other._comp),
 			_alloc(other._alloc),
-			_size(other._size) {
+			_size(0) {
 				_nil = _alloc.allocate(1);
 				_alloc.construct(_nil, value_type());
 				_nil->_is_black = true;
@@ -238,7 +238,7 @@ namespace ft
 					this->clear();
 					_comp = other._comp;
 					_alloc = other._alloc;
-					_size = other._size;
+					// _size = other._size;
 					this->insert(other.begin(), other.end());
 				}
 				return *this;
@@ -288,6 +288,7 @@ namespace ft
 				if (_get_root() == _nil) {
 					node_pointer new_root = _construct_node(value);
 					_set_root(new_root);
+					_insert_update(new_root);
 					return ft::make_pair(iterator(new_root, _nil), true);
 				}
 				else {
@@ -307,6 +308,7 @@ namespace ft
 				if (_get_root() == _nil) {
 					node_pointer new_root = _construct_node(value);
 					this->_set_root(new_root);
+					_insert_update(new_root);
 					return iterator(new_root, _nil);
 				}
 				else {
@@ -454,7 +456,7 @@ namespace ft
 				if (_comp(parent->_value, child->_value)) {
 					if (parent->_right == _nil) {
 						parent->_right = child;
-						child->_parent = parent->_right;
+						child->_parent = parent;
 					}
 					else
 						_insert_node_at(parent->_right, child);
@@ -462,7 +464,7 @@ namespace ft
 				else {
 					if (parent->_left == _nil) {
 						parent->_left = child;
-						child->_parent = parent->_right;
+						child->_parent = parent;
 					}
 					else
 						_insert_node_at(parent->_left, child);
@@ -470,7 +472,7 @@ namespace ft
 			}
 			void _insert_fix_up(node_pointer node) {
 				node_pointer current = node;
-				while (current->_parent != NULL && current->_parent->is_red() == true) {
+				while (current != _get_root() && current->_parent->is_red() == true) {
 					if (current->_parent == current->_parent->_parent->_left) {
 						current = _insert_fix_up_left(current);
 					}
@@ -491,11 +493,11 @@ namespace ft
 				else {
 					if (current == current->_parent->_right) {
 						current = current->_parent;
-						_rotate_right(current);
+						_rotate_left(current);
 					}
 					current->_parent->_is_black = true;
 					current->_parent->_parent->_is_black = false;
-					_rotate_left(current->_parent->_parent);
+					_rotate_right(current->_parent->_parent);
 				}
 				return current;
 			}
@@ -532,7 +534,7 @@ namespace ft
 				if (parent->_right != _nil) // 만약 자식이 존재한다면 자식의 부모 정보도 업데이트 해 준다.
 					parent->_right->_parent = parent;
 				right_child->_parent = parent->_parent; // 자식의 부모도 부모의 부모로 (...) 업데이트 해 준다.
-				if (right_child->_parent == NULL) {	// 만약 부모가 루트였을 경우에는 자식을 루트로 업데이트 해 준다.
+				if (right_child->_parent == _end) {	// 만약 부모가 루트였을 경우에는 자식을 루트로 업데이트 해 준다.
 					_set_root(right_child);
 				}
 				else {
@@ -555,7 +557,7 @@ namespace ft
 
 				left_child->_parent = parent->_parent;
 
-				if (left_child->_parent == NULL)
+				if (left_child->_parent == _end)
 					_set_root(left_child);
 				else
 				{
