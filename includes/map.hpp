@@ -191,17 +191,17 @@ namespace ft
 			};
 
 			iterator lower_bound( const Key& key ) {
-				return iterator(_tree.lower_bound());
+				return _tree.lower_bound(key);
 			};
 			const_iterator lower_bound( const Key& key ) const {
-				return const_iterator(_tree.lower_bound());
+				return _tree.lower_bound(key);
 			};
 
 			iterator upper_bound( const Key& key ) {
-				return iterator(_tree.upper_bound());
+				return _tree.upper_bound()
 			};
 			const_iterator upper_bound( const Key& key ) const {
-				return const_iterator(_tree.upper_bound());
+				return _tree.upper_bound()
 			};
 
 			// ANCHOR - Observers

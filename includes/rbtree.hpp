@@ -242,10 +242,10 @@ namespace ft
 				return *this;
 			};
 			~rbTree(void) {
-				/*TODO - tree 소멸자
-					- 완전히 삭제 (end부터 삭제해야 할 듯 ?)
-					- nil 삭제
-				*/
+				this->clear();
+				_destruct_node(_nil);
+				_destruct_node(_end)
+				// NOTE (end는 다음의 무언가를 가리키게 해 두었으므로 소멸자에서만 해제하는게 맞을 듯 하다.)
 			};
 			// ANCHOR - iterator
 			node_pointer begin(void) const {
@@ -256,7 +256,8 @@ namespace ft
 			};
 			// ANCHOR - Modifiers
 			void clear(void) {
-				// TODO
+				if (_size != 0)
+					_clear_tree(_get_root());
 			};
 
 			/** 
@@ -377,12 +378,33 @@ namespace ft
 				}
 				return _end;
 			};
-			node_pointer lower_bound( const Key& key ) const {
-				// TODO
-			}
-			node_pointer upper_bound( const Key& key ) const {
-				// TODO
-			}
+			iterator lower_bound( const Key& key ) const {
+				iterator iter = this->begin();
+				iterator end = this->end();
+				while (iter != end) {
+					if (!_comp(it->first, key))
+						break;
+					iter++;
+				}
+				return iter;
+			};
+			// const_iterator lower_bound( const Key& key ) const {
+			// 	return _tree.lower_bound(key);
+			// };
+
+			iterator upper_bound( const Key& key ) const {
+				iterator iter = this->begin();
+				iterator end = this->end();
+				while (iter != end) {
+					if (_comp(key, iter->first))
+						break;
+					iter++;
+				}
+				return iter;
+			};
+			// const_iterator upper_bound( const Key& key ) const {
+			// 	return _tree.upper_bound()
+			// };
 		// SECTION - private member functions
 		private :
 			rbTree (void) {};
@@ -402,6 +424,7 @@ namespace ft
 				// TODO - 생성시에 동적할당 해줬기 때문에 지워줌. 만약에 불필요하다면 없애버리자.
 				_alloc.destroy(&(ret->_value));
 				_alloc.deallocate(ptr, 1);
+				_size--;
 			}
 			// ANCHOR - insert node
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
@@ -683,6 +706,14 @@ namespace ft
 			};
 			node_pointer _get_root(void) {
 				return _end->_left;
+			}
+			void _clear_tree(node_pointer sub_root) {
+				if (sub_root == _nil)
+					return;
+				this->_clear_tree(sub_root->_left);
+				this->_clear_tree(sub_root->right);
+				_destruct_node(sub_root);
+				// TODO - _end 노드가 지워지는지 확인할 것. (지워지면 안된다.)
 			}
 		// !SECTION
 	};
