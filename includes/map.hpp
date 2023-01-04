@@ -78,7 +78,7 @@ namespace ft
 			: _comp(other._comp),
 			_alloc(other._alloc),
 			_tree(other._tree) {
-				_tree.insert(other.begin(), other.end());
+				// _tree.insert(other.begin(), other.end()); (초기화 시에 이미 복사되었다.)
 			};
 			map& operator=( const map& other ) {
 				if (*this != other) {
@@ -88,6 +88,7 @@ namespace ft
 				}
 				return *this;
 			};
+			~map() {};
 			allocator_type get_allocator() const {
 				return _alloc;
 			};
