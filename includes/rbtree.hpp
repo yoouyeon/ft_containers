@@ -90,9 +90,12 @@ namespace ft
 		public :
 			// SECTION - Member funcions
 			// ANCHOR - construct/copy/destruct
-			treeIterator(void) : _ptr(NULL) _nil(NULL) {};
-			treeIterator(pointer ptr, pointer nil) : _ptr(ptr) _nil(nil) {};
-			treeIterator(const treeIterator &other) : _ptr(other._ptr) _nil(other._nil) {};
+			treeIterator(void) : _ptr(NULL), _nil(NULL) {};
+			treeIterator(node_pointer ptr, node_pointer nil) : _ptr(ptr), _nil(nil) {};
+			treeIterator(const treeIterator &other) { *this = other; };
+			operator treeIterator<const T, U>(void) const { 
+				return treeIterator<const T, U>(this->_ptr, this->_nil);
+			};
 			treeIterator &operator=(const treeIterator &other) {
 				if (this != &other) {
 					_ptr = other._ptr;
@@ -106,18 +109,18 @@ namespace ft
 				return _ptr;
 			}
 			// ANCHOR - equality/inequality operators
-			bool operator==(const treeIterator &other) {
-				return _ptr == other.base()
+			bool operator==(const treeIterator &other) const {
+				return _ptr == other.base();
 			}
-			bool operator!=(const treeIterator &other) {
+			bool operator!=(const treeIterator &other) const {
 				return _ptr != other.base();
 			}
 			// ANCHOR - Element access
-			pointer operator*(void) const {
-				return &(_ptr->_value);
-			}
-			reference operator->(void) const {
+			reference operator*(void) const {
 				return _ptr->_value;
+			}
+			pointer operator->(void) const {
+				return &(_ptr->_value);
 			}
 			// ANCHOR - increase, decrease
 			treeIterator &operator++(void) {
@@ -127,7 +130,7 @@ namespace ft
 				else
 				{
 					node_pointer child = this->_ptr;
-					this->_ptr = this->_node->_parent;
+					this->_ptr = this->_ptr->_parent;
 					while (this->_ptr != NULL && child == this->_ptr->_right) {
 						child = this->_ptr;
 						this->_ptr = this->_ptr->_parent;
@@ -141,7 +144,7 @@ namespace ft
 				else
 				{
 					node_pointer child = this->_ptr;
-					this->_ptr = this->_node->_parent;
+					this->_ptr = this->_ptr->_parent;
 					while (this->_ptr != NULL && child == this->_ptr->_left) {
 						child = this->_ptr;
 						this->_ptr = this->_ptr->_parent;
@@ -180,31 +183,30 @@ namespace ft
 	// !SECTION
 
 	// SECTION - red-black tree
-	/**
-	 * @param T	ft::pair<const Key, t>
-	 * @param Key map key
-	 */
 	template<typename T, typename Key, typename Comp = std::less<T>, typename Alloc = std::allocator<T> >
 	class rbTree {
 		public :
-			typedef treeNode<T> node;
-			typedef node* node_pointer;
 			typedef T value_type;
+			typedef treeNode<value_type> node_type;
+			typedef node_type* node_pointer;
 			typedef Key key_type;
-			typedef treeIterator<value_type, node> iterator;
-			typedef __tree_iterator<const value_type, node_type> const_iterator;
+			typedef treeIterator<value_type, node_type> iterator;
+			typedef treeIterator<const value_type, node_type> const_iterator;
 			typedef std::size_t		size_type;
+			typedef Alloc										allocator_type;
+			typedef typename allocator_type::template rebind<node_type>::other node_allocator;
+			typedef Comp		key_compare;
 			
 			// TODO - 필요없으면 private으로 옮겨도 ㄱㅊ
 			node_pointer	_begin;	// first (smallest)
 			node_pointer	_end;	// last (?)
 			node_pointer	_nil; 	// unique leaf black node 
-			Comp			_comp;
-			Alloc			_alloc;
+			key_compare			_comp;
+			node_allocator			_alloc;
 			size_type		_size;
 
 			// ANCHOR - tree construct
-			rbTree (const Comp &comp, const Alloc &alloc)
+			rbTree (const key_compare &comp = key_compare(), const allocator_type &alloc = allocator_type())
 			: _comp(comp),
 			_alloc(alloc),
 			_size(0) {
@@ -222,7 +224,7 @@ namespace ft
 			_alloc(other._alloc),
 			_size(other._size) {
 				_nil = _alloc.allocate(1);
-				_alloc.construct(&(_nil->_value), value_type());
+				_alloc.construct(_nil, value_type());
 				_nil->_is_black = true;
 				_nil->_parent = NULL;
 				_nil->_left = NULL;
@@ -232,7 +234,7 @@ namespace ft
 				this->insert(other.begin(), other.end());
 			};
 			rbTree& operator=( const rbTree& other ) {
-				if (*this != other) {
+				if (this != &other) {
 					this->clear();
 					_comp = other._comp;
 					_alloc = other._alloc;
@@ -244,15 +246,25 @@ namespace ft
 			~rbTree(void) {
 				this->clear();
 				_destruct_node(_nil);
-				_destruct_node(_end)
+				_destruct_node(_end);
 				// NOTE (end는 다음의 무언가를 가리키게 해 두었으므로 소멸자에서만 해제하는게 맞을 듯 하다.)
 			};
 			// ANCHOR - iterator
-			node_pointer begin(void) const {
-				return _begin;
+			iterator begin(void) {
+				// return _begin;
+				return iterator(_begin, _nil);
 			};
-			node_pointer end(void) const {
-				return _end;
+			iterator end(void) {
+				// return _end;
+				return iterator(_end, _nil);
+			};
+			const_iterator begin(void) const {
+				// return _begin;
+				return const_iterator(_begin, _nil);
+			};
+			const_iterator end(void) const {
+				// return _end;
+				return const_iterator(_end, _nil);
 			};
 			// ANCHOR - Modifiers
 			void clear(void) {
@@ -276,7 +288,7 @@ namespace ft
 				if (_get_root() == _nil) {
 					node_pointer new_root = _construct_node(value);
 					_set_root(new_root);
-					return ft::make_pair(this->_set_root(value), true);
+					return ft::make_pair(iterator(new_root, _nil), true);
 				}
 				else {
 					return this->_insert_node(value);
@@ -293,7 +305,9 @@ namespace ft
 				 * case 2) 그 외 : _insert_hint_node(node_pointer pos, const value_type& value) 함수 호출
 				 */
 				if (_get_root() == _nil) {
-					return this->_set_root(value);
+					node_pointer new_root = _construct_node(value);
+					this->_set_root(new_root);
+					return iterator(new_root, _nil);
 				}
 				else {
 					return this->_insert_hint_node(pos.base(), value);
@@ -314,8 +328,8 @@ namespace ft
 				 * ft::map에서도 세크폴트를 유발하는 것이 맞을지 모르겠다.
 				 */
 				if (_size == 0)
-					return;
-				iterator temp(pos, _nil);	// backup (for iterator )
+					return this->end();
+				iterator temp(pos);	// backup (for iterator )
 				temp++;
 				if (pos == this->begin()) {
 					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
@@ -329,8 +343,8 @@ namespace ft
 				_size--;
 				return temp;
 			};
-			size_type erase( const key_type& key ) {
-				iterator target = iterator(this->find(key), _nil);
+			size_type erase( const value_type &key_value ) {
+				iterator target = iterator(_find_node(key_value), _nil);
 				if (target == this->end())
 					return 0;
 				else {
@@ -364,55 +378,21 @@ namespace ft
 			};
 
 			// ANCHOR - Lookup
-			node_pointer find( const key_type &key ) const {
-				if (this->empty())
-					return _end;
-				node_pointer ptr = _get_root();
-				while(ptr != _nil) {
-					if (_comp(ptr->_value, key))
-						ptr = ptr->_right;
-					else if (_comp(key, ptr->_value))
-						ptr = ptr->_left;
-					else
-						return ptr;
-				}
-				return _end;
+			iterator find( const value_type &key_value ) {
+				return iterator(_find_node(key_value), _nil);
 			};
-			iterator lower_bound( const Key& key ) const {
-				iterator iter = this->begin();
-				iterator end = this->end();
-				while (iter != end) {
-					if (!_comp(it->first, key))
-						break;
-					iter++;
-				}
-				return iter;
+			const_iterator find(  const value_type &key_value ) const {
+				return const_iterator(_find_node(key_value), _nil);
 			};
-			// const_iterator lower_bound( const Key& key ) const {
-			// 	return _tree.lower_bound(key);
-			// };
-
-			iterator upper_bound( const Key& key ) const {
-				iterator iter = this->begin();
-				iterator end = this->end();
-				while (iter != end) {
-					if (_comp(key, iter->first))
-						break;
-					iter++;
-				}
-				return iter;
-			};
-			// const_iterator upper_bound( const Key& key ) const {
-			// 	return _tree.upper_bound()
-			// };
 		// SECTION - private member functions
 		private :
 			rbTree (void) {};
 			// ANCHOR - construct, destruct node
-			node_pointer _construct_node (value_type &value) {
+			node_pointer _construct_node (const value_type &value) {
 				node_pointer ret = _alloc.allocate(1);
 				// TODO - 왜 과거의 나는 이걸 동적할당 해줬을까?
-				_alloc.construct (&(ret->_value), value);
+				_alloc.construct(ret, value);
+				// ret->_value = value;
 				ret->_is_black = false;
 				ret->_parent = NULL;
 				ret->_left = _nil;
@@ -422,15 +402,30 @@ namespace ft
 
 			void _destruct_node(node_pointer ptr) {
 				// TODO - 생성시에 동적할당 해줬기 때문에 지워줌. 만약에 불필요하다면 없애버리자.
-				_alloc.destroy(&(ret->_value));
+				_alloc.destroy(ptr);
 				_alloc.deallocate(ptr, 1);
 				_size--;
 			}
+			// ANCHOR - find
+			node_pointer _find_node( const value_type &key_value ) const {
+				if (this->empty())
+					return _end;
+				node_pointer ptr = _get_root();
+				while(ptr != _nil) {
+					if (_comp(ptr->_value, key_value))
+						ptr = ptr->_right;
+					else if (_comp(key_value, ptr->_value))
+						ptr = ptr->_left;
+					else
+						return ptr;
+				}
+				return _end;
+			};
 			// ANCHOR - insert node
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
-				node_pointer node_ptr = this->find(value.first);
+				node_pointer node_ptr = _find_node(value);
 				bool result;
-				if (node_ptr != this->end()) {
+				if (node_ptr != _end) {
 					result = false;
 					node_ptr->_value.second = value.second;
 				}
@@ -442,14 +437,14 @@ namespace ft
 					_insert_fix_up(node_ptr);
 					_insert_update(node_ptr);
 				}
-				return ft::make_pair(iterator(ret_ptr, _nil), result);
+				return ft::make_pair(iterator(node_ptr, _nil), result);
 			};
 			iterator _insert_hint_node(node_pointer pos, const value_type& value) {
-				node_pointer node_ptr = this->find(value.first);
-				if (node_ptr != this->end())
+				node_pointer node_ptr = _find_node(value);
+				if (node_ptr != _end)
 					node_ptr->_value.second = value.second;
 				else {
-					// TODO - pos를 이용해서 실제로 넣을 수 있는 위치를 효율적으로 찾는 작업이 필요함. (__find_equal(const_iterator __hint 을 참고하면 좋을 듯?)
+					(void)pos; // TODO - pos를 이용해서 실제로 넣을 수 있는 위치를 효율적으로 찾는 작업이 필요함. (__find_equal(const_iterator __hint 을 참고하면 좋을 듯?)
 					node_ptr = _construct_node(value);
 					// _insert_node_at(pos, node_ptr);
 					_insert_node_at(_get_root(), node_ptr);
@@ -459,7 +454,7 @@ namespace ft
 				return iterator(node_ptr, _nil);
 			};
 			void _insert_node_at(node_pointer parent, node_pointer child) {
-				node_pointer new_node;
+				// node_pointer new_node;
 				if (_comp(parent->_value, child->_value)) {
 					if (parent->_right == _nil) {
 						parent->_right = child;
@@ -525,6 +520,7 @@ namespace ft
 					current->_parent->_parent->_is_black = false;
 					_rotate_left(current->_parent->_parent);
 				}
+				return current;
 			}
 
 			void _insert_update(node_pointer new_node) {
@@ -592,7 +588,7 @@ namespace ft
 			}
 
 			void _delete_fix_up(node_pointer node) {
-				while (node != _get_root() && node->_is_black() == true) {
+				while (node != _get_root() && node->is_black() == true) {
 					// 대체된 노드의 새로운 자리가 왼쪽 자식 자리인 경우
 					if (node == node->_parent->_left) {
 						node = _delete_fix_up_left(node);
@@ -625,7 +621,7 @@ namespace ft
 					}
 					sibling->_is_black = node->_parent->_is_black;
 					node->_parent->_is_black = true;
-					sibling->_right->is_black = true;
+					sibling->_right->_is_black = true;
 					_rotate_left(node->_parent);
 					node = _get_root();
 				}
@@ -653,7 +649,7 @@ namespace ft
 					}
 					sibling->_is_black = node->_parent->_is_black;
 					node->_parent->_is_black = true;
-					sibling->_left->is_black = true;
+					sibling->_left->_is_black = true;
 					_rotate_right(node->_parent);
 					node = _get_root();
 				}
@@ -704,14 +700,14 @@ namespace ft
 				_end->_left = new_root;
 				new_root->_parent = _end;
 			};
-			node_pointer _get_root(void) {
+			node_pointer _get_root(void) const {
 				return _end->_left;
 			}
 			void _clear_tree(node_pointer sub_root) {
 				if (sub_root == _nil)
 					return;
 				this->_clear_tree(sub_root->_left);
-				this->_clear_tree(sub_root->right);
+				this->_clear_tree(sub_root->_right);
 				_destruct_node(sub_root);
 				// TODO - _end 노드가 지워지는지 확인할 것. (지워지면 안된다.)
 			}

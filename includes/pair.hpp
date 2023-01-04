@@ -18,7 +18,7 @@ namespace ft
 			pair( const pair<U1, U2>& p ) : first(p.first), second(p.second) {};
 			// ANCHOR - Assign
 			pair& operator=( const pair& other ) {
-				if (*this != other) {
+				if (this != &other) {
 					first = other.first;
 					second = other.second;
 				}
@@ -34,7 +34,7 @@ namespace ft
 
 	template< class T1, class T2 >
 	bool operator==( const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs ) {
-		return lhs.first == rhs.first && lhs.second == rhs.second;
+		return (lhs.first == rhs.first) && (lhs.second == rhs.second);
 	}
 
 	template< class T1, class T2 >
