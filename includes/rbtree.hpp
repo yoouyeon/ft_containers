@@ -425,10 +425,8 @@ namespace ft
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
 				node_pointer node_ptr = _find_node(value);
 				bool result;
-				if (node_ptr != _end) {
+				if (node_ptr != _end)
 					result = false;
-					node_ptr->_value.second = value.second;
-				}
 				else {
 					result = true;
 					node_ptr = _construct_node(value);
@@ -441,9 +439,7 @@ namespace ft
 			};
 			iterator _insert_hint_node(node_pointer pos, const value_type& value) {
 				node_pointer node_ptr = _find_node(value);
-				if (node_ptr != _end)
-					node_ptr->_value.second = value.second;
-				else {
+				if (node_ptr == _end) {
 					(void)pos; // TODO - pos를 이용해서 실제로 넣을 수 있는 위치를 효율적으로 찾는 작업이 필요함. (__find_equal(const_iterator __hint 을 참고하면 좋을 듯?)
 					node_ptr = _construct_node(value);
 					// _insert_node_at(pos, node_ptr);
