@@ -224,7 +224,7 @@ namespace ft
 			_alloc(other._alloc),
 			_size(0) {
 				_nil = _alloc.allocate(1);
-				_alloc.construct(_nil, value_type());
+				_alloc.construct(&(_nil->_value), value_type());
 				_nil->_is_black = true;
 				_nil->_parent = NULL;
 				_nil->_left = NULL;
@@ -270,6 +270,8 @@ namespace ft
 			void clear(void) {
 				if (_size != 0)
 					_clear_tree(_get_root());
+				_end->_left = _nil;
+				_begin = _end;
 			};
 
 			/** 
@@ -333,10 +335,10 @@ namespace ft
 					return this->end();
 				iterator temp(pos);	// backup (for iterator )
 				temp++;
-				if (pos == this->begin()) {
-					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
-					_begin = pos.base();
-				}
+				// if (pos == this->begin()) {
+				// 	// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
+				// 	_begin = pos.base();
+				// }
 				// pos에 해당하는 노드를 트리에서 떼어내기
 				_delete_node(pos.base());
 				// 노드 메모리 상에서 제거하기
@@ -580,6 +582,9 @@ namespace ft
 			void _delete_node(node_pointer target) {
 				bool _target_original_color_is_black = target->_is_black;
 				node_pointer replace_node = _get_replace_node(target);
+				// 만약 지워야 할 노드가 최솟값이었다면, 대체 노드를 최솟값으로 바꿔 줍니다.
+				if (target == _begin)
+					_begin = target;
 				_transplant(target, replace_node);
 				if (_target_original_color_is_black == true)
 					_delete_fix_up(replace_node);
