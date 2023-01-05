@@ -695,6 +695,25 @@ namespace ft
 					if (replace_node != _nil)
 						replace_node->_parent = target->_parent;
 				}
+				// // SECTION 
+				// // NOTE - 자식 옮겨주기 함수 추가해봄
+				// // 1. target의 _left, _right가 replace_node가 아니고 _nil이 아니라면, 자식의 _parent 정보를 모두 replace_node로 변경
+				// if (target->_left != replace_node && target->_left != _nil)
+				// 	target->_left->_parent = replace_node;
+				// if (target->_left != replace_node && target->_right != _nil)
+				// 	target->_right->_parent = replace_node;
+				// // 2. target의 _left가 replace_node라면 replace_node의 _left를 _nil로 바꾸어주기
+				// // 아니면 replace_node의 _left를 target의 _left로
+				// if (target->_left == replace_node)
+				// 	replace_node->_left = _nil;
+				// else
+				// 	replace_node->_left = target->_left;
+				// // 3. 2와 같은 내용을 target의 _right에 적용
+				// if (target->_right == replace_node)
+				// 	replace_node->_right = _nil;
+				// else
+				// 	replace_node->_right = target->_right;
+				// // !SECTION
 			}
 
 			// ANCHOR - util
