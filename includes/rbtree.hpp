@@ -131,7 +131,7 @@ namespace ft
 				{
 					node_pointer child = this->_ptr;
 					this->_ptr = this->_ptr->_parent;
-					while (this->_ptr != NULL && child == this->_ptr->_right) {
+					while (this->_ptr != _nil && child == this->_ptr->_right) {
 						child = this->_ptr;
 						this->_ptr = this->_ptr->_parent;
 					}
@@ -145,7 +145,7 @@ namespace ft
 				{
 					node_pointer child = this->_ptr;
 					this->_ptr = this->_ptr->_parent;
-					while (this->_ptr != NULL && child == this->_ptr->_left) {
+					while (this->_ptr != _nil && child == this->_ptr->_left) {
 						child = this->_ptr;
 						this->_ptr = this->_ptr->_parent;
 					}
@@ -213,9 +213,9 @@ namespace ft
 				_nil = _alloc.allocate(1);
 				_alloc.construct(&(_nil->_value), value_type());
 				_nil->_is_black = true;
-				_nil->_parent = NULL;
-				_nil->_left = NULL;
-				_nil->_right = NULL;
+				_nil->_parent = _nil;
+				_nil->_left = _nil;
+				_nil->_right = _nil;
 				_begin = _construct_node(value_type());
 				_end = _begin;
 			};
@@ -226,9 +226,9 @@ namespace ft
 				_nil = _alloc.allocate(1);
 				_alloc.construct(&(_nil->_value), value_type());
 				_nil->_is_black = true;
-				_nil->_parent = NULL;
-				_nil->_left = NULL;
-				_nil->_right = NULL;
+				_nil->_parent = _nil;
+				_nil->_left = _nil;
+				_nil->_right = _nil;
 				_begin = _construct_node(value_type());
 				_end = _begin;
 				this->insert(other.begin(), other.end());
@@ -270,6 +270,7 @@ namespace ft
 			void clear(void) {
 				if (_size != 0)
 					_clear_tree(_get_root());
+				_size = 0;
 				_end->_left = _nil;
 				_begin = _end;
 			};
@@ -345,6 +346,10 @@ namespace ft
 				_destruct_node(pos.base());
 				// 마지막에 사이즈 감소시키기
 				_size--;
+				// 이상해진 _nil의 내부 변수들 수정해주기
+				_nil->_left = _nil;
+				_nil->_right = _nil;
+				_nil->_parent = _nil;
 				return temp;
 			};
 			size_type erase( const value_type &key_value ) {
