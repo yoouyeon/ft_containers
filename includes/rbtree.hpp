@@ -211,7 +211,7 @@ namespace ft
 			_alloc(alloc),
 			_size(0) {
 				_nil = _alloc.allocate(1);
-				_alloc.construct(&(_nil->_value), value_type());
+				_alloc.construct(_nil, value_type());
 				_nil->_is_black = true;
 				_nil->_parent = _nil;
 				_nil->_left = _nil;
@@ -224,7 +224,7 @@ namespace ft
 			_alloc(other._alloc),
 			_size(0) {
 				_nil = _alloc.allocate(1);
-				_alloc.construct(&(_nil->_value), value_type());
+				_alloc.construct(_nil, value_type());
 				_nil->_is_black = true;
 				_nil->_parent = _nil;
 				_nil->_left = _nil;
