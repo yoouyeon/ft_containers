@@ -335,10 +335,10 @@ namespace ft
 					return this->end();
 				iterator temp(pos);	// backup (for iterator )
 				temp++;
-				// if (pos == this->begin()) {
-				// 	// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
-				// 	_begin = pos.base();
-				// }
+				if (pos == this->begin()) {
+					// 만약 지우려는 값이 최솟값이었다면 새로운 최솟값으로 업데이트 해 줍니다.
+					_begin = temp.base();
+				}
 				// pos에 해당하는 노드를 트리에서 떼어내기
 				_delete_node(pos.base());
 				// 노드 메모리 상에서 제거하기
@@ -408,7 +408,6 @@ namespace ft
 				// TODO - 생성시에 동적할당 해줬기 때문에 지워줌. 만약에 불필요하다면 없애버리자.
 				_alloc.destroy(ptr);
 				_alloc.deallocate(ptr, 1);
-				_size--;
 			}
 			// ANCHOR - find
 			node_pointer _find_node( const value_type &key_value ) const {
@@ -579,16 +578,66 @@ namespace ft
 			}
 
 			// ANCHOR - erase/delete
-			void _delete_node(node_pointer target) {
-				bool _target_original_color_is_black = target->_is_black;
-				node_pointer replace_node = _get_replace_node(target);
-				// 만약 지워야 할 노드가 최솟값이었다면, 대체 노드를 최솟값으로 바꿔 줍니다.
-				if (target == _begin)
-					_begin = target;
-				_transplant(target, replace_node);
-				if (_target_original_color_is_black == true)
-					_delete_fix_up(replace_node);
+			// SECTION - delete 새로 작성해보자
+			/** ==============================================================================
+			 * NOTE : _delete_node flow
+			 * case 1) 삭제하려는 노드 z에 자식이 없거나, 1개 있는 자식이 오른쪽 자식인 경우
+			 * case 2) 삭제하려는 노드 z에 자식이 왼쪽 자식 1개뿐인 경우
+			 * case 3) 삭제하려는 노드 z에 자식이 2개인 경우
+			 * 	- y를 오른쪽 서브트리의 최솟값으로 변경
+			 *  - x를 y의 오른쪽 자식으로 변경
+			 *  ============================================================================== */
+			void _delete_node(node_pointer z) {
+				// TODO - 변수 네이밍 꼭 수정합시다 ^_^
+				node_pointer y = z;
+				node_pointer x;
+				bool y_original_color_is_black = y->_is_black;
+
+				if (z->_left == _nil) { // case 1)
+					x = z->_right;
+					_transplant(z, x);
+				}
+				else if (z->_right == _nil) { // case 2)
+					x = z->_left;
+					_transplant(z, x);
+				}
+				else {	// case 3)
+					y = _get_minimum_node(z->_right);
+					y_original_color_is_black = y->_is_black;
+					x = y->_right;
+					// ===
+					if (y->_parent == z) { // 왜 필요한 작업인지 모르겠다
+						x->_parent = y;
+					}
+					else {
+						_transplant(y, x);
+						y->_right = z->_right;
+						y->_right->_parent = y;
+					}
+					_transplant(z, y);
+					y->_left = z->_left;
+					y->_left->_parent = y;
+					y->_is_black = z->_is_black;
+				}
+				if (y_original_color_is_black == true)
+					_delete_fix_up(x);
 			}
+
+
+			// SECTION
+
+
+
+			// void _delete_node(node_pointer target) {
+			// 	bool _target_original_color_is_black = target->_is_black;
+			// 	node_pointer replace_node = _get_replace_node(target);
+			// 	// 만약 지워야 할 노드가 최솟값이었다면, 대체 노드를 최솟값으로 바꿔 줍니다.
+			// 	if (target == _begin)
+			// 		_begin = target;
+			// 	_transplant(target, replace_node);
+			// 	if (_target_original_color_is_black == true)
+			// 		_delete_fix_up(replace_node);
+			// }
 
 			void _delete_fix_up(node_pointer node) {
 				while (node != _get_root() && node->is_black() == true) {
