@@ -5,6 +5,7 @@
 #include <memory>
 #include <iterator>
 #include "pair.hpp"
+#include <iostream>
 
 namespace ft
 {
@@ -125,40 +126,52 @@ namespace ft
 			// ANCHOR - increase, decrease
 			treeIterator &operator++(void) {
 				// 전위
+				// std::cout << "전위증가!!!!!!!!!\n";
 				if (this->_ptr->_right != _nil)
 					this->_ptr = this->_get_minimum_node(this->_ptr->_right);
 				else
 				{
-					node_pointer child = this->_ptr;
-					this->_ptr = this->_ptr->_parent;
-					while (this->_ptr != _nil && child == this->_ptr->_right) {
-						child = this->_ptr;
-						this->_ptr = this->_ptr->_parent;
+					// node_pointer child = this->_ptr;
+					// this->_ptr = this->_ptr->_parent;
+					// while (this->_ptr != _nil && child == this->_ptr->_right) {
+					// 	child = this->_ptr;
+					// 	this->_ptr = this->_ptr->_parent;
+					// }
+					while (_ptr != _nil && _ptr != _ptr->_parent->_left) {
+						_ptr = _ptr->_parent;
 					}
+					_ptr = _ptr->_parent;
 				}
 				return (*this);
 			}
 			treeIterator &operator--(void) {
+				// std::cout << "전위감소!!!!!!!!!\n";
 				if (this->_ptr->_left != _nil)
 					this->_ptr = this->_get_maximum_node(this->_ptr->_left);
 				else
 				{
-					node_pointer child = this->_ptr;
-					this->_ptr = this->_ptr->_parent;
-					while (this->_ptr != _nil && child == this->_ptr->_left) {
-						child = this->_ptr;
-						this->_ptr = this->_ptr->_parent;
+					// node_pointer child = this->_ptr;
+					// this->_ptr = this->_ptr->_parent;
+					// while (this->_ptr != _nil && child == this->_ptr->_left) {
+					// 	child = this->_ptr;
+					// 	this->_ptr = this->_ptr->_parent;
+					// }
+					while (_ptr != _nil && _ptr != _ptr->_parent->_right) {
+						_ptr = _ptr->_parent;
 					}
+					_ptr = _ptr->_parent;
 				}
 				return (*this);
 			}
 			treeIterator operator++(int) {
 				// 후위
+				// std::cout << "후위증가!!!!!!!!!\n";
 				treeIterator ret(*this);
 				++(*this);
 				return ret;
 			}
 			treeIterator operator--(int) {
+				// std::cout << "후위감소!!!!!!!!!\n";
 				treeIterator ret(*this);
 				--(*this);
 				return ret;
@@ -403,7 +416,7 @@ namespace ft
 				_alloc.construct(ret, value);
 				// ret->_value = value;
 				ret->_is_black = false;
-				ret->_parent = NULL;
+				ret->_parent = _nil;
 				ret->_left = _nil;
 				ret->_right = _nil;
 				return (ret);
