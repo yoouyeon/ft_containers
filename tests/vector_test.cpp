@@ -52,6 +52,7 @@ void pop_back_empty() {
 int main(void) {
     // test_test();
     pop_back_empty();
+    system("leaks container");
 
     return 0;
 }
