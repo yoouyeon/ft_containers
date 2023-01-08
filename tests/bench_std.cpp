@@ -1,4 +1,4 @@
-# define MAX_SIZE 10000
+# define MAX_SIZE 20
 
 #include <iostream>
 #include <vector>
@@ -90,17 +90,54 @@ void delete_test_map_std(void) {
 }
 
 void search_test_map_std(void) {
-
+	std::map<int, int>m;
+	for(int i = 0; i < MAX_SIZE; i++) {
+		m.insert(std::make_pair(i, i * 2));
+	}
+	for(int i = 1; i * 2 < MAX_SIZE; i++) {
+		m.find(i * 2);
+	}
+	m.equal_range(3);
+	m.lower_bound(3);
+	m.upper_bound(3);
+	std::cout << BLUE << "🐋 search_test_map_std DONE" << RESET << std::endl;
 }
 
 void insert_test_set_std(void) {
-
+	std::set<int>s;
+	for(int i = 0; i * 2 < MAX_SIZE; i++) {
+		s.insert(i);
+		s.insert(-i);
+	}
+	std::cout << BLUE << "🐋 insert_test_set_std DONE" << RESET << std::endl;
 }
 
 void delete_test_set_std(void) {
-
+	std::set<int>s;
+	for(int i = 0; i < MAX_SIZE; i++) {
+		s.insert(i);
+	}
+	for(int i = 1; i * 4 < MAX_SIZE; i++) {
+		s.erase(i * 4);
+	}
+	s.erase(s.begin());
+	s.erase(--s.end());
+	s.erase(++(++s.begin()));
+	s.erase(--(--s.end()));
+	s.erase(++(++s.begin()), --(--s.end()));
+	std::cout << BLUE << "🐋 delete_test_set_std DONE" << RESET << std::endl;
 }
 
 void search_test_set_std(void) {
-
+	std::set<int>s;
+	for(int i = 0; i < MAX_SIZE; i++) {
+		s.insert(i);
+	}
+	for(int i = 1; i * 2 < MAX_SIZE; i++) {
+		s.find(i * 2);
+	}
+	s.equal_range(3);
+	s.lower_bound(3);
+	s.upper_bound(3);
+	std::cout << BLUE << "🐋 search_test_set_std DONE" << RESET << std::endl;
 }

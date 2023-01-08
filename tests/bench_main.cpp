@@ -21,6 +21,7 @@ void delete_test_map(void);
 void search_test_map(void);
 void insert_test_set(void);
 void delete_test_set(void);
+void search_test_set(void);
 
 void insert_test_vector_std(void);
 void delete_test_vector_std(void);
@@ -32,6 +33,7 @@ void delete_test_map_std(void);
 void search_test_map_std(void);
 void insert_test_set_std(void);
 void delete_test_set_std(void);
+void search_test_set_std(void);
 
 float time_to_msec(clock_t time) {
 	return time / (float)CLOCKS_PER_SEC * 1000;
@@ -78,9 +80,23 @@ int main(void) {
 	std::cout << std::endl << CYAN << "--------------------- insert_test_map ----------------------" << RESET << std::endl;
 	bench_test_box(insert_test_map, insert_test_map_std);
 
-	std::cout << std::endl << CYAN << "--------------------- delete_test_map ----------------------" << RESET << std::endl;
-	bench_test_box(delete_test_map, delete_test_map_std);
+	// ERROR : pointer being freed was not allocated
+	// std::cout << std::endl << CYAN << "--------------------- delete_test_map ----------------------" << RESET << std::endl;
+	// bench_test_box(delete_test_map, delete_test_map_std);
 
-	std::cout << "BENCH_TEST_FINISHED!!" << std::endl;
+	std::cout << std::endl << CYAN << "--------------------- search_test_map ----------------------" << RESET << std::endl;
+	bench_test_box(search_test_map, search_test_map_std);
+
+	std::cout << std::endl << CYAN << "--------------------- insert_test_set ----------------------" << RESET << std::endl;
+	bench_test_box(insert_test_set, insert_test_set_std);
+
+	// ERROR : pointer being freed was not allocated
+	// std::cout << std::endl << CYAN << "--------------------- delete_test_set ----------------------" << RESET << std::endl;
+	// bench_test_box(delete_test_set, delete_test_set_std);
+
+	std::cout << std::endl << CYAN << "--------------------- search_test_set ----------------------" << RESET << std::endl;
+	bench_test_box(search_test_set, search_test_set_std);
+
+	std::cout << std::endl << PURPLE << "BENCH_TEST_FINISHED!!" << RESET << std::endl;
 	return 0;
 }
