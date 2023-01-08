@@ -251,12 +251,12 @@ namespace ft
 					pointer temp = _start;
 					// 새로운 _start
 					_start = _alloc.allocate(new_cap);
-					_capacity = new_cap;
 					for (size_type i = 0; i < _size; i++) {
 						_alloc.construct(&_start[i], temp[i]);
 						_alloc.destroy(&temp[i]);
 					}
 					_alloc.deallocate(temp, _capacity);
+					_capacity = new_cap;
 				}
 			};
 			size_type capacity() const {
@@ -277,16 +277,19 @@ namespace ft
 			};
 			iterator insert(const_iterator pos, size_type count, const T& value) {
 				// inserts count copies of the value before pos.
+				difference_type pos_offset = pos - begin();
 				size_type new_size = _size + count;
-				iterator old_start = iterator(_start);
 				if (_capacity < new_size)
 					this->reserve(_new_capacity(new_size));
-				pointer ptr = _start + (pos - old_start);
-				std::copy_backward(ptr, _start + _size, _start + new_size);
 				for (size_type i = 0; i < count; i++)
-					_alloc.construct(&ptr[i], value);
+					_alloc.construct(_start + _size + i, T());
+				pointer new_pos = _start + pos_offset;
+				std::copy_backward(new_pos, _start + _size, _start + new_size);
+				for (size_type i = 0 ; i < count ; i++) {
+					new_pos[i] = value;
+				}
 				_size = new_size;
-				return iterator(ptr);
+				return iterator(new_pos);
 				/* TODO
 					- pos에 대한 iterator/pointer 결정 ✔️
 					- 뒤에서부터 pos 전까지 복사 ✔️
