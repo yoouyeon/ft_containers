@@ -92,6 +92,11 @@ namespace ft
 			allocator_type get_allocator() const {
 				return _alloc;
 			};
+			// SECTION
+			void print_nodes_map() const {
+				_tree.print_nodes_map();
+			}
+			//!SECTION
 			// ANCHOR - Element access
 			T& at( const Key& key ) {
 				iterator iter = this->find(key);

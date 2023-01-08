@@ -262,6 +262,27 @@ namespace ft
 				_destruct_node(_end);
 				// NOTE (end는 다음의 무언가를 가리키게 해 두었으므로 소멸자에서만 해제하는게 맞을 듯 하다.)
 			};
+			//SECTION - print
+			void
+			print_nodes_map(void) const
+			{
+				check2(this->_end->_left);
+			};
+
+			void
+			check2(node_pointer node_) const
+			{
+				if (node_->_left != _nil)
+					check2(node_->_left);
+				if (node_->_parent != _end)
+					std::cout << "key: " << node_->_value.first << "\tv: " << node_->_value.second << "\tparents: " << node_->_parent->_value.first << "\tv: " << node_->_parent->_value.second << "\tcolor: " << (node_->_is_black ? "black" : "red") << std::endl;
+				else
+					std::cout << "key: " << node_->_value.first << "\tv: " << node_->_value.second<< "\tparents: " << "ROOT" << " \tcolor: " << (node_->_is_black ? "black" : "red") << std::endl;
+				if (node_->_right != _nil)
+					check2(node_->_right);
+			};
+			//!SECTION
+
 			// ANCHOR - iterator
 			iterator begin(void) {
 				// return _begin;
