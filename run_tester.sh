@@ -27,7 +27,9 @@ make fclean
 cd ../
 echo -e "$(BRED) ====== develop tester ====== $(RESET)"
 cd FT_CONTAINERS_42_tester
+rm -f ./includes/your_headers_files/*.hpp
 cp ../../includes/*.hpp ./includes/your_headers_files
+make fclean
 echo -e "$(BPURPLE)VECTOR TEST START$(RESET)"
 read input
 make vector
@@ -38,13 +40,13 @@ make stack
 sleep 10
 echo -e "$(BPURPLE)MAP TEST START$(RESET)"
 read input
-make stack
+make map
 sleep 10
 echo -e "$(BPURPLE)SET TEST START$(RESET)"
 read input
-make stack
+make set
 sleep 10
 make fclean
-rm -rf *.hpp 
+rm -f ./includes/your_headers_files/*.hpp 
 cd ../
 echo -e $(BRED) ==== develop tester ends === $(RESET)
