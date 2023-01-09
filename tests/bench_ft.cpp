@@ -1,4 +1,4 @@
-# define MAX_SIZE 20
+# define MAX_SIZE 100000
 #include <iostream>
 #include "map.hpp"
 #include "stack.hpp"
@@ -82,30 +82,13 @@ void delete_test_map(void) {
 	for(int i = 0; i < MAX_SIZE; i++) {
 		m.insert(ft::make_pair(i, i * 2));
 	}
-	m.print_nodes_map();
-	for(int i = 1; i * 4 < MAX_SIZE; i++) {
-		std::cout << "- erase " << i * 4 <<std::endl;
+	for(int i = 1; i * 4 < MAX_SIZE; i++)
 		m.erase(i * 4);
-		m.print_nodes_map();
-	}
-	std::cout << std::endl;
-	m.print_nodes_map();
 	m.erase(m.begin());
-	std::cout << std::endl;
-	m.print_nodes_map();
 	m.erase(--m.end());
-	std::cout << std::endl;
-	m.print_nodes_map();
 	m.erase(++(++m.begin()));
 	m.erase(--(--m.end()));
-	std::cout << std::endl;
-	m.print_nodes_map();
-	std::cout << (++(++m.begin()))->first << " : " << (++(++m.begin()))->second << std::endl;
-	std::cout << (--(--m.end()))->first << " : " << (--(--m.end()))->second << std::endl;
 	m.erase(++(++m.begin()), --(--m.end()));
-	std::cout << std::endl;
-	m.print_nodes_map();
-	std::cout << "😇\n";
 	std::cout << YELLOW << "✨ delete_test_map DONE" << RESET << std::endl;
 }
 

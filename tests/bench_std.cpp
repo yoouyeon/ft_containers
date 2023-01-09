@@ -1,4 +1,4 @@
-# define MAX_SIZE 20
+# define MAX_SIZE 100000
 
 #include <iostream>
 #include <vector>
