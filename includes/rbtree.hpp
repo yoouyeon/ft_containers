@@ -617,67 +617,43 @@ namespace ft
 			}
 
 			// ANCHOR - erase/delete
-			// SECTION - delete 새로 작성해보자
-			/** ==============================================================================
-			 * NOTE : _delete_node flow
-			 * case 1) 삭제하려는 노드 z에 자식이 없거나, 1개 있는 자식이 오른쪽 자식인 경우
-			 * case 2) 삭제하려는 노드 z에 자식이 왼쪽 자식 1개뿐인 경우
-			 * case 3) 삭제하려는 노드 z에 자식이 2개인 경우
-			 * 	- y를 오른쪽 서브트리의 최솟값으로 변경
-			 *  - x를 y의 오른쪽 자식으로 변경
-			 *  ============================================================================== */
-			void _delete_node(node_pointer z) {
+			void _delete_node(node_pointer target) {
 				// TODO - 변수 네이밍 꼭 수정합시다 ^_^
-				node_pointer y = z;
+				node_pointer y = target;
 				node_pointer x;
 				bool y_original_color_is_black = y->_is_black;
 
-				if (z->_left == _nil) { // case 1)
-					x = z->_right;
-					_transplant(z, x);
+				if (target->_left == _nil) { // case 1)
+					x = target->_right;
+					_transplant(target, x);
 				}
-				else if (z->_right == _nil) { // case 2)
-					x = z->_left;
-					_transplant(z, x);
+				else if (target->_right == _nil) { // case 2)
+					x = target->_left;
+					_transplant(target, x);
 				}
 				else {	// case 3)
-					y = _get_minimum_node(z->_right);
+					y = _get_minimum_node(target->_right);
 					y_original_color_is_black = y->_is_black;
 					x = y->_right;
 					// ===
-					if (y->_parent == z) { // 왜 필요한 작업인지 모르겠다
+					if (y->_parent == target) {
+						// NOTE - 일반적인 경우라면 필요없는 작업이지만 x가 Nil인 경우에는 따로 부모가 설정되어 있지 않으므로 설정해줘야 한다.
 						x->_parent = y;
 					}
 					else {
 						_transplant(y, x);
-						y->_right = z->_right;
+						y->_right = target->_right;
 						y->_right->_parent = y;
 					}
-					_transplant(z, y);
-					y->_left = z->_left;
+					_transplant(target, y);
+					y->_left = target->_left;
 					y->_left->_parent = y;
-					y->_is_black = z->_is_black;
+					y->_is_black = target->_is_black;
 				}
 				if (y_original_color_is_black == true)
 					_delete_fix_up(x);
 			}
-
-
 			// SECTION
-
-
-
-			// void _delete_node(node_pointer target) {
-			// 	bool _target_original_color_is_black = target->_is_black;
-			// 	node_pointer replace_node = _get_replace_node(target);
-			// 	// 만약 지워야 할 노드가 최솟값이었다면, 대체 노드를 최솟값으로 바꿔 줍니다.
-			// 	if (target == _begin)
-			// 		_begin = target;
-			// 	_transplant(target, replace_node);
-			// 	if (_target_original_color_is_black == true)
-			// 		_delete_fix_up(replace_node);
-			// }
-
 			void _delete_fix_up(node_pointer node) {
 				while (node != _get_root() && node->is_black() == true) {
 					// 대체된 노드의 새로운 자리가 왼쪽 자식 자리인 경우
@@ -688,61 +664,74 @@ namespace ft
 						node = _delete_fix_up_right(node);
 					}
 				}
-				node->_is_black = true;
+				node->_is_black = true; // TODO - 이거 뭐지
 			}
 
+			// NOTE - Doubly Black 처리
 			node_pointer _delete_fix_up_left(node_pointer node) {
-				node_pointer sibling = node->_parent->_right;
-				if (sibling->is_red() == true) {
-					sibling->_is_black = true;
-					node->_parent->_is_black = false;
-					_rotate_left(node->_parent);
-					sibling = node->_parent->_right;
+				node_pointer sibling = node->_parent->_right;	// 형제는 오른쪽
+				if (sibling->is_red() == true) {		// doubly black의 형제(삼촌)가 red인 경우
+					sibling->_is_black = true;		// 삼촌의 색을 조부모의 색으로 (삼촌이 red였으니 조부모는 black)
+					node->_parent->_is_black = false;	// 조부모의 색을 삼촌의 색으로 바꾼다.
+					_rotate_left(node->_parent);	// 조부모를 기준으로 좌회전
+					sibling = node->_parent->_right;	// doubly black의 새로운 형제로 바꾸어서 상황에 맞게 처리한다.
 				}
 				if (sibling->_left->is_black() == true && sibling->_right->is_black() == true) {
-					sibling->_is_black = false;
-					node = node->_parent;
+					// 형제가 black, 자녀도 모두 black인 경우
+					// 형제들의 black을 모아서 조부모에게로 넘김. 조부모가 알아서 extra black을 처리한다.
+					// node는 doubly black이었으므로 색깔 변화가 없지만
+					sibling->_is_black = false;	// 형제는 black이 하나였으므로 색깔이 변한다.
+					node = node->_parent;	// 조부모에게로 extra black 처리 넘김
 				}
 				else {
-					if (sibling->_right->is_black() == true) {
-						sibling->_left->_is_black = true;
-						sibling->_is_black = false;
-						_rotate_right(sibling);
-						sibling = node->_parent->_right;
+					if (sibling->_right->is_black() == true) { // 형제의 방향과 다른 방향의 자녀는 red, 같은 방향의 자녀는 black인 경우 (case 3)
+						// 형제의 왼쪽 자녀와 형제의 색깔을 바꿔준다.
+						sibling->_left->_is_black = true;		// 원래 red였던 왼쪽 자녀의 색을 형제의 색인 black으로
+						sibling->_is_black = false;			// 원래 black이었던 형제의 색을 왼쪽 자녀의 색인 red로 바꿔준다.
+						_rotate_right(sibling);				// 형제를 기준으로 우회전한다.
+						sibling = node->_parent->_right;		// 아래 작업을 거쳐야 하므로 sibling을 다시 원래 지점으로 돌려준다.
 					}
-					sibling->_is_black = node->_parent->_is_black;
-					node->_parent->_is_black = true;
-					sibling->_right->_is_black = true;
-					_rotate_left(node->_parent);
-					node = _get_root();
+					// 형제의 방향과 같은 방향의 자녀가 red인 경우
+					sibling->_is_black = node->_parent->_is_black;	// 형제의 색을 부모의 색으로 바꿔준다.
+					sibling->_right->_is_black = true;				// red였던 형제의 오른쪽 자녀의 색을 black으로 바꿔준다.
+					node->_parent->_is_black = true;				// 부모의 색은 무조건 black으로 바꿔준다.(red-and-black 해결)
+					_rotate_left(node->_parent);					// 부모를 기준으로 좌회전한다.
+					node = _get_root();								// fix-up 이 끝났으므로 종료조건을 반환.
 				}
 				return node;
 			}
 
 			node_pointer _delete_fix_up_right(node_pointer node) {
-				node_pointer sibling = node->_parent->_left;
-				if (sibling->is_red() == true) {
-					sibling->_is_black = true;
-					node->_parent->_is_black = false;
-					_rotate_left(node->_parent);
-					sibling = node->_parent->_left;
+				// doubly black이 오른쪽 노드
+				node_pointer sibling = node->_parent->_left; // 형제는 왼쪽의 노드이다.
+				if (sibling->is_red() == true) { // 형제 노드가 red일 경우 (Case 1)
+					sibling->_is_black = true;	// 형제의 색을 부모의 색으로 (형제가 red이므로 부모는 black이다.)
+					node->_parent->_is_black = false;	// 부모의 색을 형제의 색 black으로
+					// _rotate_left(node->_parent);	// 부모를 기준으로 좌회전
+					_rotate_right(node->_parent);	// 형제가 왼쪽의 노드이므로, 부모를 기준으로 우회전해야 한다.
+					sibling = node->_parent->_left;	// 새로운 형제의 색으로 위치를 변경하여 다시 확인한다.
 				}
 				if (sibling->_right->is_black() == true && sibling->_left->is_black() == true) {
-					sibling->_is_black = false;
-					node = node->_parent;
+					// 만약의 형제의 두 자식들이 모두 black인 경우 (Case 2)
+					// node와 sibling 두 형제의 black을 모아서 부모에게 전달
+					// node는 doubly black이었으므로 색깔 변화가 없음
+					sibling->_is_black = false;	// 형제는 black이었으므로 red로 바뀐다.
+					node = node->_parent;		// 부모가 extra black을 받아 처리한다.
 				}
-				else {
-					if (sibling->_left->is_black() == true) {
-						sibling->_right->_is_black = true;
-						sibling->_is_black = false;
-						_rotate_left(sibling);
-						sibling = node->_parent->_left;
+				else {	// 형제의 자녀들 중에 적어도 하나가 red인 경우
+					if (sibling->_left->is_black() == true) {	// 형제와 다른 방향의 자식이 red, 같은 방향의 자식은 black인 경우 (Case 3)
+						// 형제와 같은 방향의 자식이 red가 되게 해서 Case 4를 적용시킨다.
+						sibling->_right->_is_black = true;	// 형제와 다른 방향의 자녀를 black으로 바꿈 (형제의 색깔)
+						sibling->_is_black = false;			// 형제의 색깔을 다른 방향의 자녀의 색깔로 바꿈 (Red)
+						_rotate_left(sibling);				// 형제를 기준으로 좌회전 한다.
+						sibling = node->_parent->_left;		// 아래 작업을 거쳐야 하므로 다시 형제 포인터를 원래의 값으로 돌린다.
 					}
-					sibling->_is_black = node->_parent->_is_black;
-					node->_parent->_is_black = true;
-					sibling->_left->_is_black = true;
-					_rotate_right(node->_parent);
-					node = _get_root();
+					// 형제와 같은 방향의 자식이 red인 경우 (Case 4)
+					sibling->_is_black = node->_parent->_is_black;	// 형제의 색을 형제의 부모의 색으로 바꾼다. (형제의 색은 원래 Black)
+					node->_parent->_is_black = true;	// 형제의 부모의 색은 무조건 Black으로 바꿔줌 (red-and-black 조치를 미리 한 것으로 이해하자)
+					sibling->_left->_is_black = true;		// 형제와 같은 방향인 왼쪽의 자녀도 Red에서 Black으로 바꿔준다.
+					_rotate_right(node->_parent);		// 부모를 기준으로 우회전한다.
+					node = _get_root();					// fix-up이 끝났으므로 종료 조건을 준다.
 				}
 				return node;
 			}
@@ -783,25 +772,6 @@ namespace ft
 					if (replace_node != _nil)
 						replace_node->_parent = target->_parent;
 				}
-				// // SECTION 
-				// // NOTE - 자식 옮겨주기 함수 추가해봄
-				// // 1. target의 _left, _right가 replace_node가 아니고 _nil이 아니라면, 자식의 _parent 정보를 모두 replace_node로 변경
-				// if (target->_left != replace_node && target->_left != _nil)
-				// 	target->_left->_parent = replace_node;
-				// if (target->_left != replace_node && target->_right != _nil)
-				// 	target->_right->_parent = replace_node;
-				// // 2. target의 _left가 replace_node라면 replace_node의 _left를 _nil로 바꾸어주기
-				// // 아니면 replace_node의 _left를 target의 _left로
-				// if (target->_left == replace_node)
-				// 	replace_node->_left = _nil;
-				// else
-				// 	replace_node->_left = target->_left;
-				// // 3. 2와 같은 내용을 target의 _right에 적용
-				// if (target->_right == replace_node)
-				// 	replace_node->_right = _nil;
-				// else
-				// 	replace_node->_right = target->_right;
-				// // !SECTION
 			}
 
 			// ANCHOR - util
