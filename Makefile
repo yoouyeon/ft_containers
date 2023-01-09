@@ -6,8 +6,9 @@ INTRA	=	test_intra
 
 # ======= Compile =======
 CXX	=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -g -std=c++98
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 CXXFLAGS	+=	-I$(INCS_DIR)
+CXXFLAGS	+= 	-fsanitize=address -g 			# TODO - 제출 전 지우기
 
 # ======= Files =======
 INCS_DIR	=	./includes/
