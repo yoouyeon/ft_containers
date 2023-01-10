@@ -101,7 +101,11 @@ int main(void) {
 	// test_end();
 	// test_erase();
 	// test_insert();
-	test_iterator();
-	system("leaks container");
+	// test_iterator();
+	ft::map<int, int, std::greater<int> > mm;
+	mm[1] = 1;
+	mm[2] = 2;
+	mm[3] = 3;
+	// system("leaks container");
 	return (0);
 }

@@ -8,12 +8,12 @@ INTRA	=	test_intra
 CXX	=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
 CXXFLAGS	+=	-I$(INCS_DIR)
-CXXFLAGS	+= 	-fsanitize=address -g 			# TODO - 제출 전 지우기
+# CXXFLAGS	+= 	-fsanitize=address -g 			# TODO - 제출 전 지우기
 
 # ======= Files =======
 INCS_DIR	=	./includes/
 INCS	=	$(addprefix $(INCS_DIR), $(INCS_LIST))
-SRCS_TEST	=	./tests/main.cpp
+SRCS_TEST	=	./tests/map_test.cpp
 SRCS_BENCH	=	./tests/bench_main.cpp ./tests/bench_ft.cpp ./tests/bench_std.cpp
 SRCS_INTRA	=	./tests/intra_main.cpp
 OBJS_TEST	=	$(patsubst %.cpp, %.o, $(SRCS_TEST))

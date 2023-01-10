@@ -28,7 +28,6 @@ namespace ft
 				return *this;
 			};
 			~vector_iterator(void) {};
-			// getter
 			pointer base(void) const {
 				return _ptr; 
 			};
@@ -101,7 +100,7 @@ namespace ft
 				temp -= n;
 				return (temp);
 			}
-
+			// TODO - Friend 키워드 왜 써야 하는지 확인해보기
 			friend vector_iterator	operator + (std::ptrdiff_t n, vector_iterator it) {
 				vector_iterator temp(it.base());
 				temp += n;

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
+#include <ctime>
 #if 0 //CREATE A REAL STL EXAMPLE
 	#include <map>
 	#include <stack>
@@ -57,6 +58,7 @@ int main(int argc, char** argv) {
 	const int seed = atoi(argv[1]);
 	srand(seed);
 
+	clock_t time = clock();
 	ft::vector<std::string> vector_str;
 	ft::vector<int> vector_int;
 	ft::stack<int> stack_int;
@@ -114,5 +116,8 @@ int main(int argc, char** argv) {
 		std::cout << *it;
 	}
 	std::cout << std::endl;
+	time = clock() - time;
+	std::cout << "time : " << time / CLOCKS_PER_SEC << std::endl;
+	system("leaks test_intra");
 	return (0);
 }

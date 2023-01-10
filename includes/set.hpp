@@ -29,7 +29,6 @@ namespace ft
 			typedef typename allocator_type::difference_type difference_type;
 			typedef typename allocator_type::pointer         pointer;
 			typedef typename allocator_type::const_pointer   const_pointer;
-			// typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::iterator non_const_iterator;
 			typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::iterator iterator;			
 			typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::const_iterator const_iterator;
 			typedef std::reverse_iterator<iterator>          reverse_iterator;

@@ -1,9 +1,7 @@
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
-/*
-	- enable_if
-	- is_integral
-*/
+
+// TODO - enable if, is integral 확인 필요함
 
 /*
 	NOTE - 

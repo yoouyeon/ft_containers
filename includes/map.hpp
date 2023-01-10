@@ -1,15 +1,13 @@
 #ifndef MAP_HPP
 # define MAP_HPP
 
-#include <algorithm>	// less
-#include <memory>		// allocator
-#include <exception>	// std::out_of_range
-// #include <cstddef>	// std::ptrdiff_t
+#include <algorithm>
+#include <memory>
+#include <exception>
 #include "algorithm.hpp"
 #include "type_traits.hpp"
 #include "rbtree.hpp"
 #include "pair.hpp"
-// #include "map_iterator.hpp"
 #include "reverse_iterator.hpp"
 
 namespace ft
@@ -25,28 +23,26 @@ namespace ft
 			typedef std::ptrdiff_t								difference_type;
 			typedef Compare										key_compare;
 			typedef Allocator									allocator_type;
-			// typedef typename allocator_type::template rebind<value_type>::other value_allocator;
 			typedef value_type&									reference;
 			typedef const value_type&							const_reference;
 			typedef ft::treeNode<value_type>					node_type;
 			typedef node_type*									node_pointer;
 			typedef typename allocator_type::pointer							pointer;
-			typedef typename allocator_type::const_pointer					const_pointer;			
+			typedef typename allocator_type::const_pointer					const_pointer;
 			class value_compare {
+				// TODO - 확인
+				friend class map; // friend : map에서 value_compare 내부 protected를 사용할 수 있게 해 줌 (protectd로 선언된 생성)
 				public : 
 					typedef bool result_type;
 					typedef value_type first_argument_type;
 					typedef value_type second_argument_type;
-
 				protected :
 					key_compare comp;
-				public :
-					value_compare() : comp(Compare()) {};
 					value_compare( Compare c ) : comp(c) {};
+				public :
 					bool operator()( const value_type& lhs, const value_type& rhs ) const {
 						return comp(lhs.first, rhs.first);
 					};
-					// TODO - key 말고 value 비교는 안해도 되나?
 			};
 			typedef typename ft::rbTree<value_type, key_type, value_compare, allocator_type>::iterator			iterator;
 			typedef typename ft::rbTree<value_type, key_type, value_compare, allocator_type>::const_iterator	const_iterator;
@@ -76,14 +72,10 @@ namespace ft
 			};
 			map( const map& other ) 
 			: _comp(other._comp),
-			// _alloc(other._alloc),
-			_tree(other._tree) {
-				// _tree.insert(other.begin(), other.end()); (초기화 시에 이미 복사되었다.)
-			};
+			_tree(other._tree) {};
 			map& operator=( const map& other ) {
 				if (*this != other) {
 					_comp = other._comp;
-					// _alloc = other._alloc;
 					_tree = other._tree;
 				}
 				return *this;
@@ -105,24 +97,19 @@ namespace ft
 				return iter->second;
 			};
 			T& operator[]( const Key& key ) {
-				// TODO - 매커니즘 확인하기
 				return insert(_make_key_value(key)).first->second;
 			};
 			// ANCHOR - Iterators
 			iterator begin() {
-				// return iterator(_tree.begin());
 				return _tree.begin();
 			};
 			const_iterator begin() const {
-				// return const_iterator(_tree.begin());
 				return _tree.begin();
 			};
 			iterator end() {
-				// return iterator(_tree.end());
 				return _tree.end();
 			};
 			const_iterator end() const {
-				// return const_iterator(_tree.end());
 				return _tree.end();
 			};
 			reverse_iterator rbegin() {
@@ -166,8 +153,8 @@ namespace ft
 			void erase( iterator pos ) {
 				_tree.erase(pos);
 			};
+
 			size_type erase( const Key& key ) {
-				// Number of elements removed (0 or 1).
 				return _tree.erase(ft::make_pair(key, mapped_type()));
 			};
 			void erase (iterator first, iterator last) {
