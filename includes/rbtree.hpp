@@ -427,6 +427,33 @@ namespace ft
 			const_iterator find(  const value_type &key_value ) const {
 				return const_iterator(_find_node(key_value), _nil);
 			};
+
+			ft::pair<iterator,iterator> equal_range( const value_type &key_value ) {
+				// return _equal_range(key);
+				return ft::make_pair(lower_bound(key_value), upper_bound(key_value));
+			}
+
+			ft::pair<const_iterator,const_iterator> equal_range( const value_type &key_value ) const {
+				// return _equal_range(key);
+				return ft::make_pair(lower_bound(key_value), upper_bound(key_value));
+			}
+
+			iterator lower_bound( const value_type &key_value ) {
+				return iterator(_lower_bound(key_value), _nil);
+			}
+
+			const_iterator lower_bound( const value_type &key_value ) const {
+				return const_iterator(_lower_bound(key_value), _nil);
+			}
+
+			iterator upper_bound( const value_type &key_value ) {
+				return iterator(_upper_bound(key_value), _nil);
+			}
+
+			const_iterator upper_bound( const value_type &key_value ) const {
+				return const_iterator(_upper_bound(key_value), _nil);
+			}
+
 		// SECTION - private member functions
 		private :
 			rbTree (void) {};
@@ -463,6 +490,47 @@ namespace ft
 				}
 				return _end;
 			};
+
+			// ANCHOR - range
+
+			// ft::pair<iterator, iterator> _equal_range(const key_type &key) {
+
+			// }
+
+			// ft::pair<const_iterator, const_iterator> _equal_range(const key_type &key) const {
+				
+			// }
+
+			node_pointer _upper_bound(const value_type &key_value) const {
+				node_pointer ptr = _get_root();
+				node_pointer temp = _end;
+				while (ptr != _nil) {
+					if (_comp(key_value, ptr->_value)) {
+						temp = ptr;
+						ptr = ptr->_left;
+					}
+					else {
+						ptr = ptr->_right;
+					}
+				}
+				return temp;
+			}
+
+			node_pointer _lower_bound(const value_type &key_value) const {
+				node_pointer ptr = _get_root();
+				node_pointer temp = _end;
+				while (ptr != _nil) {
+					if (!_comp(ptr->_value, key_value)) {
+						temp = ptr;
+						ptr = ptr->_left;
+					}
+					else {
+						ptr = ptr->_right;
+					}
+				}
+				return temp;
+			}
+
 			// ANCHOR - insert node
 			ft::pair<iterator, bool> _insert_node(const value_type& value) {
 				node_pointer node_ptr = _find_node(value);
@@ -773,6 +841,7 @@ namespace ft
 						replace_node->_parent = target->_parent;
 				}
 			}
+
 
 			// ANCHOR - util
 			void _set_root(node_pointer new_root) {
