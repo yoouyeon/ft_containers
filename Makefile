@@ -13,7 +13,7 @@ CXXFLAGS	+=	-I$(INCS_DIR)
 # ======= Files =======
 INCS_DIR	=	./includes/
 INCS	=	$(addprefix $(INCS_DIR), $(INCS_LIST))
-SRCS_TEST	=	./tests/map_test.cpp
+SRCS_TEST	=	./tests/main.cpp ./tests/main_vector.cpp ./tests/main_map.cpp ./tests/main_stack.cpp ./tests/main_set.cpp
 SRCS_BENCH	=	./tests/bench_main.cpp ./tests/bench_ft.cpp ./tests/bench_std.cpp
 SRCS_INTRA	=	./tests/intra_main.cpp
 OBJS_TEST	=	$(patsubst %.cpp, %.o, $(SRCS_TEST))
@@ -24,7 +24,7 @@ OBJS	=	$(OBJS_TEST) $(OBJS_BENCH) $(OBJS_INTRA)
 # ======= Rules =======
 all	:	$(NAME)
 
-$(NAME) : $(TEST) $(BENCH) $(INTRA)
+$(NAME) : $(TEST) $(TEST_STL) $(BENCH) $(INTRA)
 
 %.o	:	%.cpp
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
