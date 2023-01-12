@@ -2,6 +2,8 @@
 
 ## 🌟 index
 
+
+
 ## 🌟 STL Containers
 
 자주 사용하는 자료구조들을 템플릿 클래스로 만들어서 객체들을 그 자료구조에 접근하고, 저장할 수 있게 해 준다.
@@ -56,3 +58,140 @@ iterator를 활용하는 알고리즘 함수들은 반복자만 인자로 받기
 - [특성 정보 클래스](http://egloos.zum.com/sweeper/v/3007176)
 - [iterator_iterator](http://soen.kr/lecture/ccpp/cpp4/39-2-6.htm)
 - [cppreference - iterator_traits](https://en.cppreference.com/w/cpp/iterator/iterator_traits)
+
+### ✨ type_traits
+
+#### ⭐️ remove_cv
+
+`const`, `volatile` 한정자를 제거해준다.
+
+- `const` : 
+- `volatile` : 이렇게 선언된 변수에 대해서는 최적화를 진행하지 않는다. (레지스터에 값이 있는지를 확인하지 않고 매번 메모리를 참조한다.)
+
+```cpp
+template<class T> struct remove_cv                   {typedef T type;};
+template<class T> struct remove_cv<const T>          {typedef T type;};
+template<class T> struct remove_cv<volatile T>       {typedef T type;};
+template<class T> struct remove_cv<const volatile T> {typedef T type;};
+```
+
+2, 3, 4 라인처럼 템플릿에 const, volatile 한정자가 붙은 타입이 들어왔을 때에도 한정자를 뗀 T 타입을 type으로 정의해주었다.
+
+```cpp
+is_integral_base<typename std::remove_cv<T>::type>
+```
+
+그래서 이렇게 `remove_<cv>`의 템플릿으로 전달한 다음에 type을 참조하게 되면 한정자가 모두 제거된 T를 참조할 수 있게 된다.
+
+#### ⭐️ integral_constant
+
+T 타입의 value 멤버의 값을 v 로 설정한다.
+
+```cpp
+template <class T, T v>
+struct integral_constant {
+	typedef T value_type;
+	typedef integral_constant<T,v> type;
+	
+  static const value_type value = v;
+};
+```
+
+이런 식으로 활용 가능
+
+```cpp
+typedef integral_constant<bool, true> true_type;
+true_type::value // <- true
+typedef integral_constant<bool, false> false_type;
+false_type::value // <- false
+```
+
+#### ⭐️ is_integral
+
+T가 정수 계열인지 확인한다.
+
+`is_integral_base` 구조체를 상속받는 빈 구조체
+
+```cpp
+template<typename T> struct is_integral: is_integral_base<typename std::remove_cv<T>::type> {};
+```
+
+`is_integral_base` 구조체 : 기본적으로는 false_type 구조체를 상속받아 value 값으로 false를 갖지만, 일부 타입에 대해서는 true를 상속받는 구조체로 오버로딩 된다.
+
+```cpp
+// 기본적으로는 false_type을 상속받아 val
+template<typename> struct is_integral_base: public false_type {};
+
+template<> struct is_integral_base<bool>: public true_type {};
+template<> struct is_integral_base<signed char>: public true_type {};
+template<> struct is_integral_base<unsigned char>: public true_type {};
+template<> struct is_integral_base<wchar_t>: public true_type {};
+template<> struct is_integral_base<short int>: public true_type {};
+template<> struct is_integral_base<unsigned short int>: public true_type {};
+template<> struct is_integral_base<int>: public true_type {};
+template<> struct is_integral_base<unsigned int>: public true_type {};
+template<> struct is_integral_base<long int>: public true_type {};
+```
+
+type 값을 확인해서 T가 정수 계열인지를 확인할 수 있다.
+
+#### ⭐️ enable_if
+
+SFINAE : Substitution Failure Is Not A Error
+
+컴파일시에 타입에 맞는 함수를 찾아가는 과정에 함수의 인자를 치환하는 작업을 하게 되는데, 타입이 맞지 않거나 타입에 맞는 표현이 아니라면 치환이 실패한다.
+
+보통의 경우에는 치환이 실패할 경우에는 컴파일 에러를 띄우고 실행을 중단하는데, SFINAE를 활용하게 되면 치환 실패했을 경우에 컴파일 에러를 띄우지 않고 오버로딩 후보군에서 제외시키는 방식으로 동작한다.
+
+일반적인 경우에는 빈 `enable_if` 로 오버로딩되다가, 첫번째 인자가 true일 경우에는 두번째 `enable_if`로 오버로딩되어 `type`이 정의되게 된다.
+
+`type` 타입이 있는지를 확인하는 방법을 사용하면 된다.
+
+```cpp
+template< bool B, class T = void >
+struct enable_if { };
+
+template<class T>
+struct enable_if<true, T> { typedef T type; };
+```
+
+이터레이터는 주소값을 가지기 때문에 컴파일 단계에서는 아래 두 생성자를 구분하기가 어렵다. 따라서 enable_if로 컴파일 에러를 발생시켜 후보군에서 제외시키는 방법을 사용한다.
+
+```cpp
+std::vector<int> v1(42, 4242);
+std::vector<int> v2(v.begin(), v.end());
+```
+
+
+
+```cpp
+template<class InputIt>
+vector(InputIt first, InputIt last, const Allocator& alloc = Allocator(), typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type* = 0)
+```
+
+
+
+
+
+#### ⭐️ 참고
+
+- [SFINAE 와 enable_if](https://modoocode.com/255)
+
+- [enable_if](http://egloos.zum.com/sweeper/v/3059985)
+
+## 🌟 red-black tree
+
+### ✨ Modifiers
+
+```cpp
+// bool의 의미 - true : 없는 key를 추가함 false : 존재하던 key의 값을 업데이트함.
+// case 1) 트리가 빈 경우 : 루트로 설정해준다.
+// case 2) 그 외 : _insert_node(const value_type& value) 함수 호출
+ft::pair<iterator, bool> insert( const value_type& value );
+
+// 여기서 말하는 pos는 insert할 정확한 위치가 아닌, 최대한 그 지점과 비슷한 곳에 삽입하라는 뜻이다.
+// 최적화된 삽입을 위한 함수이고 트리는 정렬되기 때문에 pos가 뭐든 들어야가 하는 곳은 정확하다.
+// 내 컨테이너에서는 아직까지는 느린 점을 찾지 못해서 pos가 주어지는 insert도 위의 value 만 받는 함수와 완전히 동일하게 동작한다.
+iterator insert( iterator pos, const value_type& value )
+```
+
