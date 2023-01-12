@@ -10,6 +10,17 @@ void print_vector(ft::vector<T> const &vec) {
 }
 
 void test_vector(void) {
+	//ANCHOR - modifier
+	{
+		print_title("= modifier =");
+		ft::vector<std::string> vec;
+		print_vector(vec);
+		vec.push_back("happy");
+		vec.push_back("ft_container");
+		print_vector(vec);
+		vec.pop_back();
+		print_vector(vec);
+	}
 	//ANCHOR - iterator
 	{
 		print_title("= iterator =");
