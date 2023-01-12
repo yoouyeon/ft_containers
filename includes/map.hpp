@@ -30,8 +30,7 @@ namespace ft
 			typedef typename allocator_type::pointer							pointer;
 			typedef typename allocator_type::const_pointer					const_pointer;
 			class value_compare {
-				// TODO - 확인
-				friend class map; // friend : map에서 value_compare 내부 protected를 사용할 수 있게 해 줌 (protectd로 선언된 생성)
+				friend class map;
 				public : 
 					typedef bool result_type;
 					typedef value_type first_argument_type;
@@ -183,61 +182,26 @@ namespace ft
 
 			ft::pair<iterator,iterator> equal_range( const key_type& key ) {
 				return _tree.equal_range(_make_key_value(key));
-				// return ft::make_pair(this->lower_bound(key), this->upper_bound(key));
 			};
 			ft::pair<const_iterator,const_iterator> equal_range( const key_type& key ) const {
 				return _tree.equal_range(_make_key_value(key));
-				// return ft::make_pair(this->lower_bound(key), this->upper_bound(key));
 			};
 
 			iterator lower_bound( const key_type& key ) {
 				return _tree.lower_bound(_make_key_value(key));
-				// iterator iter = this->begin();
-				// iterator end = this->end();
-				// while (iter != end) {
-				// 	if (!_comp(iter->first, key))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 			const_iterator lower_bound( const key_type& key ) const {
 				return _tree.lower_bound(_make_key_value(key));
-				// const_iterator iter = this->begin();
-				// const_iterator end = this->end();
-				// while (iter != end) {
-				// 	if (!_comp(iter->first, key))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 
 			iterator upper_bound( const key_type& key ) {
 				return _tree.upper_bound(_make_key_value(key));
-				// iterator iter = this->begin();
-				// iterator end = this->end();
-				// while (iter != end) {
-				// 	if (_comp(key, iter->first))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 			const_iterator upper_bound( const key_type& key ) const {
-				return _tree.upper_bound(_make_key_value(key));
-				// const_iterator iter = this->begin();
-				// const_iterator end = this->end();
-				// while (iter != end) {
-				// 	if (_comp(key, iter->first))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
+				return _tree.upper_bound(_make_key_value(key));	
 			};
 
 			// ANCHOR - Observers
-			// TODO - 잘 모르겠습니다.
 			key_compare key_comp() const {
 				return _comp;
 			};

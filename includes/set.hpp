@@ -29,7 +29,6 @@ namespace ft
 			typedef typename allocator_type::difference_type difference_type;
 			typedef typename allocator_type::pointer         pointer;
 			typedef typename allocator_type::const_pointer   const_pointer;
-			// typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::iterator non_const_iterator;
 			typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::iterator iterator;			
 			typedef typename ft::rbTree<const value_type, key_type, value_compare, allocator_type>::const_iterator const_iterator;
 			typedef std::reverse_iterator<iterator>          reverse_iterator;
@@ -48,7 +47,7 @@ namespace ft
 			_tree(_comp, _alloc) {};
 
 			template< class InputIt >
-			set( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() )
+			set( InputIt first, InputIt last, const Compare& comp = Compare(), const Allocator& alloc = Allocator() , typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = 0 )
 			: _comp(comp),
 			_alloc(alloc),
 			_tree(_comp, _alloc) {
@@ -177,60 +176,26 @@ namespace ft
 
 			ft::pair<iterator,iterator> equal_range( const Key& key ) {
 				return _tree.equal_range(key);
-				// return ft::make_pair(this->lower_bound(key), this->upper_bound(key));
 			};
 
 			ft::pair<const_iterator,const_iterator> equal_range( const Key& key ) const {
 				return _tree.equal_range(key);
-				// return ft::make_pair(this->lower_bound(key), this->upper_bound(key));
 			};
 
 			iterator lower_bound( const Key& key ) {
 				return _tree.lower_bound(key);
-				// iterator iter = this->begin();
-				// iterator end = this->end();
-				// while (iter != end) {
-				// 	if (!_comp(*iter, key))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 
 			const_iterator lower_bound( const Key& key ) const {
 				return _tree.lower_bound(key);
-				// const_iterator iter = this->begin();
-				// const_iterator end = this->end();
-				// while (iter != end) {
-				// 	if (!_comp(*iter, key))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 
 			iterator upper_bound( const Key& key ) {
 				return _tree.upper_bound(key);
-				// iterator iter = this->begin();
-				// iterator end = this->end();
-				// while (iter != end) {
-				// 	if (_comp(key, *iter))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 
 			const_iterator upper_bound( const Key& key ) const {
 				return _tree.upper_bound(key);
-				// const_iterator iter = this->begin();
-				// const_iterator end = this->end();
-				// while (iter != end) {
-				// 	if (_comp(key, *iter))
-				// 		break;
-				// 	iter++;
-				// }
-				// return iter;
 			};
 
 			// ANCHOR - Observers

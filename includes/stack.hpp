@@ -44,7 +44,6 @@ namespace ft
 			void pop() { c.pop_back(); };
 
 			// ANCHOR - operators
-			// TODO - friend 키워드 사용 정당성 여부 확인 필요함
 			friend bool operator==( const ft::stack<T, Container>& lhs, const ft::stack<T, Container>& rhs ) {
 				return lhs.c == rhs.c;
 			};

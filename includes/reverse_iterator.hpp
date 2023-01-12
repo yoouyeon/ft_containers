@@ -16,16 +16,10 @@ namespace ft
 			typedef typename ft::iterator_traits<Iter>::pointer				pointer;
 			typedef typename ft::iterator_traits<Iter>::reference			reference;
 			// ANCHOR - Member functions
-			reverse_iterator() {
-				// Default constructor. The underlying iterator is value-initialized.
-			};
-			explicit reverse_iterator(iterator_type x) : current(x) {
-				// The underlying iterator is initialized with x.
-			};
+			reverse_iterator() {};
+			explicit reverse_iterator(iterator_type x) : current(x) {};
 			template<class U>
-			reverse_iterator(const reverse_iterator<U>& other) : current(other.base()) {
-				// The underlying iterator is initialized with that of other. 
-			};
+			reverse_iterator(const reverse_iterator<U>& other) : current(other.base()) {};
 			template< class U >
 			reverse_iterator& operator=(const reverse_iterator<U>& other) {
 				if (*this != other)
@@ -33,7 +27,6 @@ namespace ft
 				return *this;
 			};
 			iterator_type base() const {
-				// Returns the underlying base iterator.
 				return current;
 			};
 			reference operator*() const {
@@ -46,7 +39,6 @@ namespace ft
 				return &(operator*());
 			};
 			reference operator[](difference_type n) const {
-				// 반환타입 unspecified ?
 				return current[-n - 1];
 			};
 			reverse_iterator& operator++() {

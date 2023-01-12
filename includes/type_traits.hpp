@@ -1,30 +1,22 @@
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
 
-// TODO - enable if, is integral 확인 필요함
-
-/*
-	NOTE - 
-	https://en.cppreference.com/w/cpp/language/types#char16_t
-*/
-
 namespace ft
 {
-	//SECTION - enable_if
+	//ANCHOR - enable_if
 	template< bool B, class T = void >
 	struct enable_if { };
 
 	template<class T>
 	struct enable_if<true, T> { typedef T type; };
 
-	//SECTION - is_integral
+	//ANCHOR - is_integral
 	template <class T, T v>
 	struct integral_constant {
 		typedef T value_type;
 		typedef integral_constant<T,v> type;
 		
 		static const value_type value = v;
-		operator T() const {return value;}
 	};
 
 	typedef integral_constant<bool, true> true_type;
