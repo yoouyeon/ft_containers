@@ -6,7 +6,7 @@ The multiple available containers in C++ all have a very different usage. To mak
 
 ## NOTE
 
-(업데이트중...)
+https://til.yoou.kr/tags/ft-container/
 
 ## TESTER
 
