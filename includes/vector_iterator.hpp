@@ -18,7 +18,7 @@ namespace ft
 			vector_iterator(void) {};
 			vector_iterator(pointer ptr) : _ptr(ptr) {};
 			vector_iterator(const vector_iterator &other) : _ptr(other.base()) {};
-			// TODO -  필요성 여부 확인 필요함.
+			// const iterator
 			operator vector_iterator<const T>(void) const { 
 				return vector_iterator<const T>(this->_ptr);
 			};
@@ -35,6 +35,18 @@ namespace ft
 			pointer _ptr;
 
 		public:
+			value_type &operator * (void) {
+				return (*_ptr);
+			}
+
+			value_type *operator -> (void) {
+				return (_ptr);
+			}
+
+			value_type &operator [] (int n) const {
+				return _ptr[n];
+			}
+
 			vector_iterator &operator++(void) {
 				_ptr++; 
 				return *this;
@@ -57,58 +69,16 @@ namespace ft
 				return temp;
 			};
 
-			bool operator == (const vector_iterator<const T> &other) const {
-				return _ptr == other.base();
-			}
-
-			bool operator != (const vector_iterator<const T> &other) const {
-				return _ptr != other.base();
-			}
-
-			bool operator > (const vector_iterator<const T> &other) const {
-				return _ptr > other.base();
-			}
-
-			bool operator >= (const vector_iterator<const T> &other) const {
-				return (_ptr >= other.base());
-			}
-
-			bool operator < (const vector_iterator<const T> &other) const {
-				return (_ptr < other.base());
-			}
-
-			bool operator <= (const vector_iterator<const T> &other) const {
-				return (_ptr <= other.base());
-			}
-
-			value_type &operator * (void) {
-				return (*_ptr);
-			}
-
-			value_type *operator -> (void) {
-				return (_ptr);
-			}
-
-			vector_iterator operator + (int n) const {
+			vector_iterator operator + (difference_type n) const {
 				vector_iterator temp(*this);
 				temp += n;
 				return (temp);
 			}
 
-			vector_iterator operator - (int n) const {
+			vector_iterator operator - (difference_type n) const {
 				vector_iterator temp(*this);
 				temp -= n;
 				return (temp);
-			}
-			// TODO - Friend 키워드 왜 써야 하는지 확인해보기
-			friend vector_iterator	operator + (std::ptrdiff_t n, vector_iterator it) {
-				vector_iterator temp(it.base());
-				temp += n;
-				return (temp);
-			}
-
-			difference_type		operator - (vector_iterator<const T> const &other) const {
-				return _ptr - other.base();
 			}
 
 			vector_iterator &operator += (int n) {
@@ -120,12 +90,52 @@ namespace ft
 				_ptr -= n;
 				return *this;
 			}
-
-			value_type &operator [] (int n) const {
-				return _ptr[n];
-			}
 	};
-	
+
+	template <typename T1, typename T2>
+	bool operator==(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() == y.base();
+	}
+
+	template <typename T1, typename T2>
+	bool operator!=(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() != y.base();
+	}
+
+	template <typename T1, typename T2>
+	bool operator<(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() < y.base();
+	}
+
+	template <typename T1, typename T2>
+	bool operator<=(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() <= y.base();
+	}
+
+	template <typename T1, typename T2>
+	bool operator>(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() > y.base();
+	}
+
+	template <typename T1, typename T2>
+	bool operator>=(const vector_iterator<T1>& x, const vector_iterator<T2>& y) {
+		return x.base() >= y.base();
+	}
+
+	template <typename T>
+	vector_iterator<T> operator + (typename vector_iterator<T>::difference_type n, const vector_iterator<T> &iter) {
+		return vector_iterator<T>(iter.base() + n);
+	}
+
+	template <typename T>
+	vector_iterator<T> operator - (typename vector_iterator<T>::difference_type n, const vector_iterator<T> &iter) {
+		return vector_iterator<T>(iter.base() - n);
+	}
+
+	template <typename T1, typename T2>
+	typename vector_iterator<T1>::difference_type operator - (const vector_iterator<T1> &x, const vector_iterator<T2> &y) {
+		return x.base() - y.base();
+	}
 }
 
 #endif
